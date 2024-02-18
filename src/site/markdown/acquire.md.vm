@@ -1,0 +1,8 @@
+#set( $symbol_pound = '#' )
+${symbol_pound} Acquiring the project
+
+The project files are hosted on OSS Sonatype, which also replicates into the [Maven Central Repository][maven-repo].
+
+All the info required to set up the dependency can be found at the [dependency information](./dependency-info.html) section, or the repositories information pages.
+
+[maven-repo]: ${mavenURL}
