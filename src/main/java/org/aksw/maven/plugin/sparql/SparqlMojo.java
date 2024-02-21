@@ -53,31 +53,6 @@ public class SparqlMojo extends AbstractMojo {
     private List<RemoteRepository> projectRepos;
 
     /**
-     * Starting version
-     */
-//    @Parameter(defaultValue = "${startingVersion}", required = true)
-//    private String startingVersion;
-    /**
-     * Starting version
-     */
-//    @Parameter(defaultValue = "false", required = true)
-//    private boolean includeSnapshots;
-    /**
-     * GroupId of project.
-     */
-//    @Parameter(defaultValue = "${project.groupId}", required = true)
-//    private String groupId;
-    /**
-     * ArtifactId of project.
-     */
-//    @Parameter(defaultValue = "${project.artifactId}", required = true)
-//    private String artifactId;
-    /**
-     * Name of the property that contains the ordered list of versions requested.
-     */
-//    @Parameter(defaultValue = "${project.artifactId}", required = true)
-//    private String versionListPropertyName;
-    /**
      * The Maven project
      */
     @Parameter(defaultValue = "${project}", readonly = true)
@@ -107,15 +82,11 @@ public class SparqlMojo extends AbstractMojo {
     @Parameter
     private List<String> args;
 
-    /**
-     * Output file
-     */
+    /** Output file */
     @Parameter
     private String outputFile;
 
-    /**
-     * Output format
-     */
+    /** Output format */
     @Parameter
     private String outputFormat;
 
