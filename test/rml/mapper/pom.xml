@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.aksw.data.config</groupId>
+  <artifactId>rml-generator</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <!-- Deploy this pom itself by deactivating the default profile:
+  
+      mvn -P'!default,release' deploy
+
+  -->
+
+
+  <parent>
+    <groupId>org.aksw.data.config</groupId>
+    <artifactId>aksw-data-deployment</artifactId>
+    <version>0.0.8</version>
+    <relativePath></relativePath>
+  </parent>
+
+
+  <packaging>pom</packaging>
+
+  <properties>
+    <!-- Child pom must define the following properties: -->
+    <!--
+    <input.groupId>${IN_GROUPID}</input.groupId>
+    <input.artifactId>${IN_ARTIFACTID}</input.artifactId>
+    <input.version>${IN_VERSION}</input.version>
+    <input.type>${IN_TYPE}</input.type>
+    -->
+
+    <output.type>ttl</output.type>
+    <output.path>${project.build.directory}/${project.artifactId}.${output.type}</output.path>
+
+
+    <!--
+    <input.urn.artifactGroup>urn:mvn:${input.groupId}:${input.artifactId}</input.urn.artifactGroup>
+    <input.urn.base>${input.urn.artifactGroup}:${input.version}</input.urn.base>
+    <input.urn.file>${input.urn.base}:${input.type}</input.urn.file>
+    <input.urn.dataset>${input.urn.base}#dataset</input.urn.dataset>
+    <input.urn.distribution>${input.urn.data}#distribution</input.urn.distribution>
+
+    <input.urn.void>${input.urn.dataset}/void</input.urn.void>
+
+    <input.urn.pom>${input.urn.base}:pom</input.urn.pom>
+    <input.urn.data>${input.urn.base}:${input.type}</input.urn.data>
+
+    <input.urn.activity>${input.urn.data}#activity</input.urn.activity>
+    <input.urn.plan>${input.urn.data}#plan</input.urn.plan>
+
+    <output.urn.base>urn:mvn:${project.groupId}:${project.artifactId}:${project.version}</output.urn.base>
+
+    <output.urn.pom>${output.urn.base}:pom</output.urn.pom>
+    <output.urn.data>${output.urn.base}:${output.type}</output.urn.data>
+    <output.urn.activity>${output.urn.base}#activity</output.urn.activity>
+
+    <datasetDirectory>${project.build.directory}/datasets</datasetDirectory>
+    <input.data.path>${datasetDirectory}/${input.artifactId}.${input.type}</input.data.path>
+    <input.pom.path>${datasetDirectory}/${input.artifactId}.pom</input.pom.path>
+    -->
+
+
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+	      <!--
+        <resources>
+          <resource>
+            <directory>${project.build.directory}/datasets</directory>
+          </resource>
+		      </resources>
+	      -->
+
+
+        <plugins>
+<!--
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>resource-dependencies</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <localRepositoryDirectory>
+                    ${project.build.directory}/cache</localRepositoryDirectory>
+                  <stripVersion>true</stripVersion>
+                  <artifactItems>
+
+                    <artifactItem>
+                      <groupId>${input.groupId}</groupId>
+                      <artifactId>${input.artifactId}</artifactId>
+                      <version>${input.version}</version>
+                      <type>pom</type>
+                      <overWrite>true</overWrite>
+                      <outputDirectory>${datasetDirectory}</outputDirectory>
+                    </artifactItem>
+
+                    <artifactItem>
+                      <groupId>${input.groupId}</groupId>
+                      <artifactId>${input.artifactId}</artifactId>
+                      <version>${input.version}</version>
+                      <type>${input.type}</type>
+                      <overWrite>true</overWrite>
+                      <outputDirectory>${datasetDirectory}</outputDirectory>
+                    </artifactItem>
+
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          -->
+
+          <plugin>
+            <groupId>org.aksw.maven.plugins</groupId>
+            <artifactId>sparql-maven-plugin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <id>generate-metadata</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>rml</goal>
+                </goals>
+                <configuration>
+                  <outputFile>${output.path}</outputFile>
+                  <outputFormat>${output.type}</outputFormat>
+<mappings>
+<mapping>
+<value><![CDATA[
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rr:      <http://www.w3.org/ns/r2rml#>
+PREFIX schema:  <http://schema.org/>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+PREFIX eg:      <http://www.example.org/>
+
+
+eg:tm1  rdf:type               rr:TriplesMap;
+        rdfs:label             "stops";
+        <http://semweb.mmlab.be/ns/rml#logicalSource>
+                [ rdf:type  <http://semweb.mmlab.be/ns/rml#LogicalSource>;
+                  <http://semweb.mmlab.be/ns/rml#referenceFormulation>
+                          <http://semweb.mmlab.be/ns/ql#CSV>;
+                  <http://semweb.mmlab.be/ns/rml#source>
+                          "STOPS.csv"
+                ];
+        rr:subjectMap          [ rdf:type     rr:SubjectMap;
+                                 rr:template  "http://transport.linkeddata.es/madrid/metro/stops/{stop_id}"
+                               ];
+        rr:predicateObjectMap  [ rdf:type         rr:PredicateObjectMap;
+                                 rr:objectMap     [ rdf:type     rr:ObjectMap;
+                                                    <http://semweb.mmlab.be/ns/rml#reference>
+                                                            "src/main/resources/stop_desc";
+                                                    rr:termType  rr:Literal
+                                                  ];
+                                 rr:predicateMap  [ rdf:type     rr:PredicateMap;
+                                                    rr:constant  dcterms:description
+                                                  ]
+                               ];
+        rr:predicateObjectMap  [ rdf:type         rr:PredicateObjectMap;
+                                 rr:objectMap     [ rdf:type     rr:ObjectMap;
+                                                    <http://semweb.mmlab.be/ns/rml#reference>
+                                                            "stop_lat";
+                                                    rr:datatype  xsd:double;
+                                                    rr:termType  rr:Literal
+                                                  ];
+                                 rr:predicateMap  [ rdf:type     rr:PredicateMap;
+                                                    rr:constant  <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                                                  ]
+                               ];
+        rr:predicateObjectMap  [ rdf:type         rr:PredicateObjectMap;
+                                 rr:objectMap     [ rdf:type     rr:ObjectMap;
+                                                    <http://semweb.mmlab.be/ns/rml#reference>
+                                                            "stop_lon";
+                                                    rr:datatype  xsd:double;
+                                                    rr:termType  rr:Literal
+                                                  ];
+                                 rr:predicateMap  [ rdf:type     rr:PredicateMap;
+                                                    rr:constant  <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                                                  ]
+                               ];
+                               .
+]]></value>
+</mapping>
+</mappings>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Declare that the output file of the data generator should become part of this artifact -->
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-artifacts</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>attach-artifact</goal>
+                </goals>
+                <configuration>
+                  <artifacts>
+                    <artifact>
+                      <file>${output.path}</file>
+                      <classifier>${output.classifier}</classifier>
+                      <type>${output.type}</type>
+                    </artifact>
+                  </artifacts>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
