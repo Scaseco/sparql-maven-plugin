@@ -52,33 +52,23 @@ public class SparqlMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.remoteProjectRepositories}", readonly = true)
     private List<RemoteRepository> projectRepos;
 
-    /**
-     * The Maven project
-     */
+    /** The Maven project */
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
-    /**
-     * The SPARQL engine to use for processing
-     */
+    /** The SPARQL engine to use for processing */
     @Parameter(defaultValue = "mem")
     private String engine;
 
-    /**
-     * The SPARQL engine to use for processing
-     */
+    /** The SPARQL engine to use for processing */
     @Parameter
     private String tmpdir;
 
-    /**
-     * Properties for use in substitution
-     */
+    /** Properties for use in substitution*/
     @Parameter
     private Map<String, String> env;
 
-    /**
-     * Arguments of the SPARQL processor
-     */
+    /** Arguments of the SPARQL processor */
     @Parameter
     private List<String> args;
 
@@ -89,7 +79,6 @@ public class SparqlMojo extends AbstractMojo {
     /** Output format */
     @Parameter
     private String outputFormat;
-
 
     @Override
     public void execute() throws MojoExecutionException {

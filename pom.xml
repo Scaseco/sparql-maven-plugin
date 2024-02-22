@@ -278,6 +278,7 @@
 	<reporting>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>${maven-project-info-reports-plugin.version}</version>
 				<reportSets>
@@ -304,6 +305,7 @@
 				<artifactId>maven-plugin-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
 				<version>${maven-changes-plugin.version}</version>
 				<reportSets>

@@ -12,15 +12,17 @@ import org.aksw.sparql_integrate.cli.cmd.CmdSparqlIntegrateMain.OutputSpec;
 import org.apache.jena.query.Query;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.sis.system.Shutdown;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
 
-@Mojo(name = "run") // TODO Consider rename to "integrate" in order to align with rdf-processing-toolkit
+@Mojo(name = "rml") // TODO Consider rename to "integrate" in order to align with rdf-processing-toolkit
 public class RmlMojo extends AbstractMojo {
 
     static { DerbyUtils.disableDerbyLog(); }
@@ -45,8 +47,18 @@ public class RmlMojo extends AbstractMojo {
     @Parameter(defaultValue = "jena", required = true)
     protected String engine;
 
-    public static record Mapping(String type, String value) {}
+    public static class Mapping {
+        protected String type;
+        protected String value;
 
+        public String getType() { return type; }
+        public void setType(String type) { this.type = type; }
+        public String getValue() { return value; }
+        public void setValue(String value) { this.value = value; }
+    }
+
+
+    @Parameter
     protected List<Mapping> mappings = new ArrayList<>();
 
     /** Properties for use in substitution */
@@ -67,15 +79,21 @@ public class RmlMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        Log logger = getLog();
+
+        logger.info("OutputFile: " + outputFile);
+        logger.info("OutputFormat: " + outputFormat);
+
         try {
             RmlToSparqlRewriteBuilder builder = new RmlToSparqlRewriteBuilder();
 
             for (Mapping mapping : mappings) {
-                String type = mapping.type();
-                String value = mapping.value();
+                String type = mapping.getType();
+                String value = mapping.getValue();
                 if ("file".equalsIgnoreCase(type)) {
                     builder.addRmlFile(value);
                 } else if(type == null || "inline".equals(type) || type.isBlank()) {
+                    logger.info("Adding RML String: " + value);
                     builder.addRmlString(value);
                 } else {
                     throw new RuntimeException("Unknown mapping type: " + type);
@@ -84,11 +102,18 @@ public class RmlMojo extends AbstractMojo {
 
             List<Entry<Query, String>> labeledQueries = builder.generate();
 
+            logger.info("Generated " + labeledQueries.size() + " queries");
+
             // TODO Introduce a proper builder at sparql integrate!
             CmdSparqlIntegrateMain cmd = new CmdSparqlIntegrateMain();
 
             for (Entry<Query, String> entry : labeledQueries) {
                 Query query = entry.getKey();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Enqueuing query: " + query);
+                }
+
                 cmd.nonOptionArgs.add(query.toString());
             }
 
@@ -96,14 +121,24 @@ public class RmlMojo extends AbstractMojo {
                 cmd.outputSpec = new OutputSpec();
                 cmd.outputSpec.outFile = outputFile;
             }
-            cmd.engine = engine;
+            // cmd.engine = engine;
             cmd.outFormat = outputFormat;
             cmd.env = env;
             cmd.debugMode = true;
 
             cmd.call();
+
+            // If the engine is sansa, then we need to run CmdSansaQuery rather than CmdRptIntegrate
+            // There should be a common abstraction
+
         } catch (Exception ex) {
             throw new MojoExecutionException("Error in plugin", ex); //ex.getCause());
+        } finally {
+            try {
+                Shutdown.stop((Class<?>)null);
+            } catch (Exception e) {
+                logger.error("Error during shutdown of Apache SIS", e);
+            }
         }
     }
 }
