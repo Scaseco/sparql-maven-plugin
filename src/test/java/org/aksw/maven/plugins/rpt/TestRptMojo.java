@@ -1,8 +1,11 @@
 package org.aksw.maven.plugins.rpt;
 
-import org.aksw.maven.plugin.rpt.RmlMojo;
+import java.io.File;
+
 import org.apache.jena.sys.JenaSystem;
+import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.MojoRule;
+import org.apache.maven.project.MavenProject;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -23,7 +26,9 @@ public class TestRptMojo {
 
     @Test
     public void testMojoGoal() throws Exception {
-        RmlMojo mojo = (RmlMojo) rule.lookupMojo("rml", "src/test/resources/rml/test-gtfs-01/pom.xml");
+        File file = new File("src/test/resources/rml/test-gtfs-01");
+        MavenProject project = rule.readMavenProject(file);
+        Mojo mojo = rule.lookupConfiguredMojo(project, "rml");
         mojo.execute();
     }
 }
