@@ -10,6 +10,7 @@ import org.aksw.rml.jena.impl.RmlToSparqlRewriteBuilder;
 import org.aksw.sparql_integrate.cli.cmd.CmdSparqlIntegrateMain;
 import org.aksw.sparql_integrate.cli.cmd.CmdSparqlIntegrateMain.OutputSpec;
 import org.apache.jena.query.Query;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -20,7 +21,11 @@ import org.apache.maven.project.MavenProject;
 import org.apache.sis.system.Shutdown;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 
 @Mojo(name = "rml") // TODO Consider rename to "integrate" in order to align with rdf-processing-toolkit
 public class RmlMojo extends AbstractMojo {
@@ -81,10 +86,16 @@ public class RmlMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         Log logger = getLog();
 
-        logger.info("OutputFile: " + outputFile);
-        logger.info("OutputFormat: " + outputFormat);
-
         try {
+//            Artifact artifact = new DefaultArtifact("dcat.org.coypu.data.disasters", "disasters", "dcat", "ttl.bz2", "0.20240220.0016-1");
+//            logger.info("################################");
+//            resolveArtifact(artifact);
+//    // 0.20240122.0609
+//            logger.info("OutputFile: " + outputFile);
+//            logger.info("OutputFormat: " + outputFormat);
+//    project.getDependencies().add(toDependency(artifact, "compile"));
+
+
             RmlToSparqlRewriteBuilder builder = new RmlToSparqlRewriteBuilder();
 
             for (Mapping mapping : mappings) {
@@ -140,5 +151,40 @@ public class RmlMojo extends AbstractMojo {
                 logger.error("Error during shutdown of Apache SIS", e);
             }
         }
+    }
+
+    /** Resolve an artifact based on the provided configuration */
+    public ArtifactResult resolveArtifact(Artifact artifact) throws ArtifactResolutionException {
+        ArtifactRequest request = new ArtifactRequest();
+        request.setArtifact(artifact);
+        request.setRepositories(projectRepos);
+        ArtifactResult result = repoSystem.resolveArtifact(repoSession, request);
+        return result;
+    }
+
+    /** Convert an aether artifact to a maven dependency */
+    public static Dependency toDependency(Artifact artifact, String scope) {
+
+        // Create a new Maven Dependency object
+        Dependency dependency = new Dependency();
+
+        // Set the groupId, artifactId, and version based on the Aether Artifact
+        dependency.setGroupId(artifact.getGroupId());
+        dependency.setArtifactId(artifact.getArtifactId());
+        dependency.setVersion(artifact.getVersion());
+
+        // Set the type if it's not the default 'jar'
+        if (!"jar".equals(artifact.getExtension())) {
+            dependency.setType(artifact.getExtension());
+        }
+
+        // Set the classifier if present
+        if (artifact.getClassifier() != null && !artifact.getClassifier().isEmpty()) {
+            dependency.setClassifier(artifact.getClassifier());
+        }
+
+        dependency.setScope(scope);
+
+        return dependency;
     }
 }

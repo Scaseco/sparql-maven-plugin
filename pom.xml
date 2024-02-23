@@ -5,13 +5,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.aksw.maven.plugins</groupId>
-	<artifactId>sparql-maven-plugin</artifactId>
+	<artifactId>rpt-maven-plugin</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 
 	<name>SPARQL Maven Plugin</name>
 	<url></url>
-	<description>Maven plugin for executing SPARQL queries on RDF resources</description>
+	<description>Maven plugin for SPARQL and RML execution</description>
 	<inceptionYear>2023</inceptionYear>
 
 	<scm>
