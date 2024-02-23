@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+So far this is just a test mapping. More work is needed to handle data attachments properly. 
+
+The following only causes jar files to be copied to a file with a csv extension.
+
+
+[INFO] Installing /.../foo-0.0.1-SNAPSHOT.jar to $HOME/.m2/repository/.../foo-0.0.1-SNAPSHOT.csv
+
+ -->
+
+<!-- 
+
+Mappings to default lifecycle, specific for each packaging.
+
+-->
+
+<component-set>
+  <components>
+
+
+    <!--
+     | CSV
+     |-->
+    <component>
+      <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+      <role-hint>csv</role-hint>
+      <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+      <configuration>
+        <lifecycles>
+          <lifecycle>
+            <id>default</id>
+            <!-- START SNIPPET: jar-lifecycle -->
+            <phases>
+              <process-resources>
+                org.apache.maven.plugins:maven-resources-plugin:2.6:resources
+              </process-resources>
+              <compile>
+                org.apache.maven.plugins:maven-compiler-plugin:2.5.1:compile
+              </compile>
+              <process-test-resources>
+                org.apache.maven.plugins:maven-resources-plugin:2.6:testResources
+              </process-test-resources>
+              <test-compile>
+                org.apache.maven.plugins:maven-compiler-plugin:2.5.1:testCompile
+              </test-compile>
+              <test>
+                org.apache.maven.plugins:maven-surefire-plugin:2.12.4:test
+              </test>
+              <package>
+                org.apache.maven.plugins:maven-jar-plugin:2.4:jar
+              </package>
+              <install>
+                org.apache.maven.plugins:maven-install-plugin:2.4:install
+              </install>
+              <deploy>
+                org.apache.maven.plugins:maven-deploy-plugin:2.7:deploy
+              </deploy>
+            </phases>
+            <!-- END SNIPPET: jar-lifecycle -->
+          </lifecycle>
+        </lifecycles>
+      </configuration>
+    </component>
+          
+  </components>
+</component-set>

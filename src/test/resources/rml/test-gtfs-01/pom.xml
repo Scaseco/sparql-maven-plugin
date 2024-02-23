@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.aksw.data.config</groupId>
+	<artifactId>rml-generator</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<properties>
+		<output.type>ttl</output.type>
+		<output.path>
+			${project.build.directory}/${project.artifactId}.${output.type}</output.path>
+	</properties>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.aksw.maven.plugins</groupId>
+				<artifactId>rpt-maven-plugin</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+				<goals>
+					<goal>rml</goal>
+				</goals>
+				<configuration>
+					<outputFile>${output.path}</outputFile>
+					<outputFormat>${output.type}</outputFormat>
+					<mappings>
+						<mapping>
+<value><![CDATA[
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rr:      <http://www.w3.org/ns/r2rml#>
+PREFIX schema:  <http://schema.org/>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+PREFIX eg:      <http://www.example.org/>
+
+
+eg:tm1  rdf:type               rr:TriplesMap;
+        rdfs:label             "stops";
+        <http://semweb.mmlab.be/ns/rml#logicalSource>
+                [ rdf:type  <http://semweb.mmlab.be/ns/rml#LogicalSource>;
+                  <http://semweb.mmlab.be/ns/rml#referenceFormulation>
+                          <http://semweb.mmlab.be/ns/ql#CSV>;
+                  <http://semweb.mmlab.be/ns/rml#source>
+                          "STOPS.csv"
+                ];
+        rr:subjectMap          [ rdf:type     rr:SubjectMap;
+                                 rr:template  "http://transport.linkeddata.es/madrid/metro/stops/{stop_id}"
+                               ];
+        rr:predicateObjectMap  [ rdf:type         rr:PredicateObjectMap;
+                                 rr:objectMap     [ rdf:type     rr:ObjectMap;
+                                                    <http://semweb.mmlab.be/ns/rml#reference>
+                                                            "src/main/resources/stop_desc";
+                                                    rr:termType  rr:Literal
+                                                  ];
+                                 rr:predicateMap  [ rdf:type     rr:PredicateMap;
+                                                    rr:constant  dcterms:description
+                                                  ]
+                               ];
+        rr:predicateObjectMap  [ rdf:type         rr:PredicateObjectMap;
+                                 rr:objectMap     [ rdf:type     rr:ObjectMap;
+                                                    <http://semweb.mmlab.be/ns/rml#reference>
+                                                            "stop_lat";
+                                                    rr:datatype  xsd:double;
+                                                    rr:termType  rr:Literal
+                                                  ];
+                                 rr:predicateMap  [ rdf:type     rr:PredicateMap;
+                                                    rr:constant  <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                                                  ]
+                               ];
+        rr:predicateObjectMap  [ rdf:type         rr:PredicateObjectMap;
+                                 rr:objectMap     [ rdf:type     rr:ObjectMap;
+                                                    <http://semweb.mmlab.be/ns/rml#reference>
+                                                            "stop_lon";
+                                                    rr:datatype  xsd:double;
+                                                    rr:termType  rr:Literal
+                                                  ];
+                                 rr:predicateMap  [ rdf:type     rr:PredicateMap;
+                                                    rr:constant  <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                                                  ]
+                               ];
+                               .
+]]></value>
+						</mapping>
+					</mappings>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

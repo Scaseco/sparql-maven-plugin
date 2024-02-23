@@ -1,4 +1,4 @@
-package org.aksw.maven.plugin.sparql;
+package org.aksw.maven.plugin.rpt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +131,7 @@ public class RmlMojo extends AbstractMojo {
             if (outputFile != null) {
                 cmd.outputSpec = new OutputSpec();
                 cmd.outputSpec.outFile = outputFile;
+                cmd.outMkDirs = true;
             }
             // cmd.engine = engine;
             cmd.outFormat = outputFormat;
