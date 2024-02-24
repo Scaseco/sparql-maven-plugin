@@ -20,6 +20,12 @@ Mappings to default lifecycle, specific for each packaging.
 <component-set>
   <components>
 
+    <!-- Artifact Handler for CSV -->
+    <component>
+      <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+      <role-hint>csv</role-hint>
+      <implementation>org.aksw.maven.plugin.rpt.CsvArtifactHandler</implementation>
+    </component>
 
     <!--
      | CSV

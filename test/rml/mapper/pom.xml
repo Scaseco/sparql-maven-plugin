@@ -20,7 +20,7 @@
   </parent>
 
 
-  <packaging>pom</packaging>
+  <packaging>csv</packaging>
 
   <properties>
     <!-- Child pom must define the following properties: -->
@@ -125,7 +125,8 @@
 
           <plugin>
             <groupId>org.aksw.maven.plugins</groupId>
-            <artifactId>sparql-maven-plugin</artifactId>
+	    <artifactId>rpt-maven-plugin</artifactId>
+	    <extensions>true</extensions>
             <version>0.0.1-SNAPSHOT</version>
             <executions>
               <execution>
