@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.aksw.maven4data.examples</groupId>
+	<artifactId>csv-dependency</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<parent>
+		<groupId>org.aksw.data.config</groupId>
+		<artifactId>aksw-data-deployment</artifactId>
+		<version>0.0.8</version>
+		<relativePath></relativePath>
+	</parent>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version> <!-- Use the latest version -->
+                <executions>
+                    <execution>
+                        <id>copy-csv-dependencies</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/csv-dependencies</outputDirectory>
+                            <includeTypes>csv</includeTypes>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+	<dependencies>
+		<dependency>
+			<groupId>deleteme</groupId>
+			<artifactId>test</artifactId>
+			<version>1.0.0</version>
+			<type>csv</type>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+</project>
+

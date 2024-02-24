@@ -1,35 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
+<!-- So far this is just a test mapping. More work is needed to handle data attachments properly. The following only causes jar files to be copied to a file with a csv extension. [INFO] Installing /.../foo-0.0.1-SNAPSHOT.jar to $HOME/.m2/repository/.../foo-0.0.1-SNAPSHOT.csv -->
 
-So far this is just a test mapping. More work is needed to handle data attachments properly. 
-
-The following only causes jar files to be copied to a file with a csv extension.
-
-
-[INFO] Installing /.../foo-0.0.1-SNAPSHOT.jar to $HOME/.m2/repository/.../foo-0.0.1-SNAPSHOT.csv
-
- -->
-
-<!-- 
-
-Mappings to default lifecycle, specific for each packaging.
-
--->
+<!-- Mappings to default lifecycle, specific for each packaging. -->
 
 <component-set>
   <components>
 
-    <!-- Artifact Handler for CSV -->
+<!--     Artifact Handler for CSV -->
     <component>
       <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
       <role-hint>csv</role-hint>
       <implementation>org.aksw.maven.plugin.rpt.CsvArtifactHandler</implementation>
     </component>
 
-    <!--
-     | CSV
-     |-->
+<!--     <component> -->
+<!--       <role>org.apache.maven.artifact.handler.ArtifactHandler</role> -->
+<!--       <role-hint>csv</role-hint> -->
+<!--       <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation> -->
+<!--       <configuration> -->
+<!--         <type>csv</type> -->
+<!--         <extension>jar</extension> -->
+<!--         <language>java</language> -->
+<!--         <addedToClasspath>true</addedToClasspath> -->
+<!--         <includesDependencies>true</includesDependencies> -->
+<!--       </configuration> -->
+<!--     </component> -->
+
+    <!-- | CSV | -->
     <component>
       <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
       <role-hint>csv</role-hint>
@@ -70,6 +68,6 @@ Mappings to default lifecycle, specific for each packaging.
         </lifecycles>
       </configuration>
     </component>
-          
+
   </components>
 </component-set>

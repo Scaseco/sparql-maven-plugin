@@ -1,4 +1,4 @@
-package org.aksw.maven.plugin.rpt;
+package org.aksw.maven.plugin.unnecessary;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,8 +9,6 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
@@ -30,7 +28,8 @@ import org.eclipse.aether.resolution.DependencyResult;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 
-@Mojo(name = "copy-csv-dependencies", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
+/** Not needed - see comments in {@link CsvArtifactHandler} */
+// @Mojo(name = "copy-csv-dependencies", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class CopyCsvDependenciesMojo extends AbstractMojo {
 
     /** The repository system (Aether) which does most of the management. */
