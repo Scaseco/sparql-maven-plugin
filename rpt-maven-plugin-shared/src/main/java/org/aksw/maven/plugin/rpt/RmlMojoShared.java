@@ -1,5 +1,6 @@
 package org.aksw.maven.plugin.rpt;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,8 @@ import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 
-@Mojo(name = "rml") // TODO Consider rename to "integrate" in order to align with rdf-processing-toolkit
-public class RmlMojo extends AbstractMojo {
+@Mojo(name = "rml")
+public class RmlMojoShared extends AbstractMojo {
 
     static { DerbyUtils.disableDerbyLog(); }
 
@@ -76,7 +77,11 @@ public class RmlMojo extends AbstractMojo {
 
     /** Output file */
     @Parameter
-    private String outputFile;
+    private File outputFile;
+
+    /** Work directory - from where to resolve relative paths in the RML mapping */
+    @Parameter
+    private File workDirectory;
 
     /** Output format */
     @Parameter
@@ -118,6 +123,10 @@ public class RmlMojo extends AbstractMojo {
             // TODO Introduce a proper builder at sparql integrate!
             CmdSparqlIntegrateMain cmd = new CmdSparqlIntegrateMain();
 
+            if (workDirectory != null) {
+                cmd.nonOptionArgs.add("cwd=" + workDirectory.getAbsolutePath());
+            }
+
             for (Entry<Query, String> entry : labeledQueries) {
                 Query query = entry.getKey();
 
@@ -130,7 +139,7 @@ public class RmlMojo extends AbstractMojo {
 
             if (outputFile != null) {
                 cmd.outputSpec = new OutputSpec();
-                cmd.outputSpec.outFile = outputFile;
+                cmd.outputSpec.outFile = outputFile.getAbsolutePath();
                 cmd.outMkDirs = true;
             }
             // cmd.engine = engine;

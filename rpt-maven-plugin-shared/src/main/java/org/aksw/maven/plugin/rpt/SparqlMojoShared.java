@@ -36,7 +36,7 @@ import org.eclipse.aether.repository.RemoteRepository;
  *
  */
 @Mojo(name = "run") // TODO Consider rename to "integrate" in order to align with rdf-processing-toolkit
-public class SparqlMojo extends AbstractMojo {
+public class SparqlMojoShared extends AbstractMojo {
 
     static { DerbyUtils.disableDerbyLog(); }
 

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.aksw.maven.plugins</groupId>
+		<artifactId>rpt-maven-plugin-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+		
+	<artifactId>rpt-maven-plugin-shared</artifactId>
+	<packaging>jar</packaging>
+
+	<description>Common code for variants of the rpt-maven-plugin</description>
+	<inceptionYear>2024</inceptionYear>
+
+	<scm>
+		<connection>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</developerConnection>
+		<url>https://github.com/Scaseco/sparql-maven-plugin.git</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<dependencies>
+		<!-- Maven API -->
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-artifact</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>maven-dependency-tree</artifactId>
+<!--			<scope>${maven-api.scope}</scope>-->
+		</dependency>
+
+		<!-- RdfProcessingToolkit -->
+		<!-- FIXME We shouldn't depend directly on the CLI module -->
+		<dependency>
+			<groupId>org.aksw.rdf-processing-toolkit</groupId>
+			<artifactId>rdf-processing-toolkit-cli</artifactId>
+			<version>${rdf-processing-toolkit.version}</version>
+		</dependency>
+
+		<!-- Unit testing -->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.maven.plugin-testing</groupId>-->
+<!--			<artifactId>maven-plugin-testing-harness</artifactId>-->
+<!--			<version>${maven-plugin-testing-harness.version}</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
+
+		<!-- Needed to make maven-plugin-testing-harness work -->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.maven</groupId>-->
+<!--			<artifactId>maven-compat</artifactId>-->
+<!--			<version>${maven-api.version}</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>		-->
+	</dependencies>
+</project>

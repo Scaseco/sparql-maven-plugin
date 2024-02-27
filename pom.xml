@@ -3,24 +3,16 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<groupId>org.aksw.maven.plugins</groupId>
-	<artifactId>rpt-maven-plugin</artifactId>
+	<artifactId>rpt-maven-plugin-parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>maven-plugin</packaging>
+	<packaging>pom</packaging>
 
-	<name>SPARQL Maven Plugin</name>
-	<url></url>
-	<description>Maven plugin for SPARQL and RML execution</description>
-	<inceptionYear>2023</inceptionYear>
-
-	<scm>
-		<connection>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</connection>
-		<developerConnection>
-			scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</developerConnection>
-		<url>https://github.com/Scaseco/sparql-maven-plugin.git</url>
-		<tag>HEAD</tag>
-	</scm>
+	<modules>
+		<module>rpt-maven-plugin-shared</module>
+		<module>rpt-maven-plugin</module>
+		<!-- <module>rpt-full-maven-plugin</module>-->
+	</modules>
 
 	<properties>
 		<rdf-processing-toolkit.version>1.9.8-SNAPSHOT</rdf-processing-toolkit.version>
@@ -61,10 +53,6 @@
 		<nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
 	</properties>
 
-	<prerequisites>
-		<maven>3.5</maven>
-	</prerequisites>
-
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -85,14 +73,195 @@
 			<timezone>+1</timezone>
 		</developer>
 	</developers>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+					<configuration>
+						<release>${maven.compiler.release}</release>
+						<encoding>${project.build.sourceEncoding}</encoding>
+					</configuration>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-scm-publish-plugin</artifactId>
+					<version>${maven-scm-publish-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${maven-javadoc-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>${nexus-staging-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>${maven-gpg-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>${maven-release-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>${maven-plugin-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${maven-resources-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>${maven-install-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven-site-plugin.version}</version>
+					<dependencies>
+						<dependency>
+							<!-- Docs Maven Skin -->
+							<groupId>com.bernardomg.maven.skins</groupId>
+							<artifactId>docs-maven-skin</artifactId>
+							<version>2.0.6</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<!-- site deploy is performed by scm-publish plugin -->
+						<skipDeploy>true</skipDeploy>
+						<relativizeDecorationLinks>false</relativizeDecorationLinks>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.aksw.maven.plugins</groupId>
+				<artifactId>rpt-maven-plugin-shared</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			
+			<!-- Maven API -->
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>${maven-api.version}</version>
+				<scope>${maven-api.scope}</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-artifact</artifactId>
+				<version>${maven-api.version}</version>
+				<scope>${maven-api.scope}</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-core</artifactId>
+				<version>${maven-api.version}</version>
+				<scope>${maven-api.scope}</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugin-tools</groupId>
+				<artifactId>maven-plugin-annotations</artifactId>
+				<version>${maven-plugin-annotations.version}</version>
+				<scope>${maven-api.scope}</scope>
+			</dependency>
+	
+			<dependency>
+				<groupId>org.apache.maven.shared</groupId>
+				<artifactId>maven-dependency-tree</artifactId>
+				<version>3.2.1</version>
+	<!--			<scope>${maven-api.scope}</scope>-->
+			</dependency>
+	
+			<!-- Unit testing -->
+			<dependency>
+				<groupId>org.apache.maven.plugin-testing</groupId>
+				<artifactId>maven-plugin-testing-harness</artifactId>
+				<version>${maven-plugin-testing-harness.version}</version>
+				<scope>test</scope>
+			</dependency>
+	
+			<!-- Needed to make maven-plugin-testing-harness work -->
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-compat</artifactId>
+				<version>${maven-api.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>maven.aksw.internal</id>
+			<name>AKSW Release Repository</name>
+			<url>https://maven.aksw.org/repository/internal/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>maven.aksw.snapshots</id>
+			<name>AKSW Snapshot Repository</name>
+			<url>https://maven.aksw.org/repository/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<distributionManagement>
+		<site>
+			<id>github</id>
+			<url>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</url>
+		</site>
+		<repository>
+			<id>maven.aksw.internal</id>
+			<name>AKSW Release Repository</name>
+			<url>https://maven.aksw.org/repository/internal/</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.aksw.snapshots</id>
+			<name>AKSW Snapshot Repository</name>
+			<url>https://maven.aksw.org/repository/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
 	<profiles>
 		<profile>
 			<id>release</id>
 			<distributionManagement>
 				<repository>
 					<id>ossrh</id>
-					<url>
-						https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
 
@@ -174,268 +343,5 @@
 			</build>
 		</profile>
 	</profiles>
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-scm-publish-plugin</artifactId>
-					<version>${maven-scm-publish-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>${maven-compiler-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>${maven-source-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>${maven-javadoc-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>${nexus-staging-maven-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>${maven-gpg-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>${maven-release-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-plugin-plugin</artifactId>
-					<version>${maven-plugin-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>${maven-resources-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>${maven-install-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>${maven-site-plugin.version}</version>
-					<dependencies>
-						<dependency>
-							<!-- Docs Maven Skin -->
-							<groupId>com.bernardomg.maven.skins</groupId>
-							<artifactId>docs-maven-skin</artifactId>
-							<version>2.0.6</version>
-						</dependency>
-					</dependencies>
-					<configuration>
-						<!-- site deploy is performed by scm-publish plugin -->
-						<skipDeploy>true</skipDeploy>
-						<relativizeDecorationLinks>false</relativizeDecorationLinks>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>${basedir}</directory>
-				<targetPath>META-INF</targetPath>
-				<includes>
-					<include>LICENSE</include>
-					<include>NOTICE</include>
-					<include>README.md</include>
-				</includes>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<useReleaseProfile>false</useReleaseProfile>
-					<releaseProfiles>release</releaseProfiles>
-					<goals>deploy</goals>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<release>${maven.compiler.release}</release>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>${maven-project-info-reports-plugin.version}</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>dependencies</report>
-							<report>team</report>
-							<report>ci-management</report>
-							<report>issue-management</report>
-							<report>licenses</report>
-							<report>scm</report>
-							<report>plugin-management</report>
-							<report>plugins</report>
-							<report>summary</report>
-							<report>index</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-plugin-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-changes-plugin</artifactId>
-				<version>${maven-changes-plugin.version}</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>github-report</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<onlyMilestoneIssues>false</onlyMilestoneIssues>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${maven-javadoc-plugin.version}</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>javadoc-no-fork</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-		</plugins>
-	</reporting>
-	<dependencies>
-		<!-- Maven API -->
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-plugin-api</artifactId>
-			<version>${maven-api.version}</version>
-			<scope>${maven-api.scope}</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-artifact</artifactId>
-			<version>${maven-api.version}</version>
-			<scope>${maven-api.scope}</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-core</artifactId>
-			<version>${maven-api.version}</version>
-			<scope>${maven-api.scope}</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven.plugin-tools</groupId>
-			<artifactId>maven-plugin-annotations</artifactId>
-			<version>${maven-plugin-annotations.version}</version>
-			<scope>${maven-api.scope}</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.maven.shared</groupId>
-			<artifactId>maven-dependency-tree</artifactId>
-			<version>3.2.1</version>
-<!--			<scope>${maven-api.scope}</scope>-->
-		</dependency>
-
-		<!-- RdfProcessingToolkit -->
-		<!-- FIXME We shouldn't depend directly on the CLI module -->
-		<dependency>
-			<groupId>org.aksw.rdf-processing-toolkit</groupId>
-			<artifactId>rdf-processing-toolkit-cli</artifactId>
-			<version>${rdf-processing-toolkit.version}</version>
-		</dependency>
-
-		<!-- Unit testing -->
-		<dependency>
-			<groupId>org.apache.maven.plugin-testing</groupId>
-			<artifactId>maven-plugin-testing-harness</artifactId>
-			<version>${maven-plugin-testing-harness.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Needed to make maven-plugin-testing-harness work -->
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-compat</artifactId>
-			<version>${maven-api.version}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
-	<repositories>
-		<repository>
-			<id>maven.aksw.internal</id>
-			<name>AKSW Release Repository</name>
-			<url>https://maven.aksw.org/repository/internal/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>maven.aksw.snapshots</id>
-			<name>AKSW Snapshot Repository</name>
-			<url>https://maven.aksw.org/repository/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
-	<distributionManagement>
-		<site>
-			<id>github</id>
-			<url>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</url>
-		</site>
-		<repository>
-			<id>maven.aksw.internal</id>
-			<name>AKSW Release Repository</name>
-			<url>https://maven.aksw.org/repository/internal/</url>
-		</repository>
-		<snapshotRepository>
-			<id>maven.aksw.snapshots</id>
-			<name>AKSW Snapshot Repository</name>
-			<url>https://maven.aksw.org/repository/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 </project>
+
