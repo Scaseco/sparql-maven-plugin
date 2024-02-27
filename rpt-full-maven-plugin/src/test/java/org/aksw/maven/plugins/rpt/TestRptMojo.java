@@ -6,7 +6,6 @@ import org.apache.jena.sys.JenaSystem;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -26,7 +25,6 @@ public class TestRptMojo {
     };
 
     @Test
-    @Ignore
     public void testMojoGoal() throws Exception {
         File file = new File("src/test/resources/rml/test-gtfs-01");
         MavenProject project = rule.readMavenProject(file);

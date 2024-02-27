@@ -11,7 +11,7 @@
 	<modules>
 		<module>rpt-maven-plugin-shared</module>
 		<module>rpt-maven-plugin</module>
-		<!-- <module>rpt-full-maven-plugin</module>-->
+		<module>rpt-full-maven-plugin</module>
 	</modules>
 
 	<properties>
