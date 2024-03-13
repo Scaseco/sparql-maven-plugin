@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.aksw.maven.plugins</groupId>
+		<artifactId>rpt-maven-plugin-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>tdb2-maven-plugin</artifactId>
+	<packaging>maven-plugin</packaging>
+
+	<description>Maven plugin for creating, loading and packaging an Apache Jena TDB2 RDF database.</description>
+	<inceptionYear>2024</inceptionYear>
+
+	<properties>
+		<ver.jena>5.0.0-rc1</ver.jena>
+	</properties>
+
+	<prerequisites>
+		<maven>3.5</maven>
+	</prerequisites>
+
+	<scm>
+		<connection>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</connection>
+		<developerConnection>
+			scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</developerConnection>
+		<url>https://github.com/Scaseco/sparql-maven-plugin.git</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}</directory>
+				<targetPath>META-INF</targetPath>
+				<includes>
+					<include>LICENSE</include>
+					<include>NOTICE</include>
+					<include>README.md</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<useReleaseProfile>false</useReleaseProfile>
+					<releaseProfiles>release</releaseProfiles>
+					<goals>deploy</goals>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<release>${maven.compiler.release}</release>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+	
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${maven-project-info-reports-plugin.version}</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>dependencies</report>
+							<report>team</report>
+							<report>ci-management</report>
+							<report>issue-management</report>
+							<report>licenses</report>
+							<report>scm</report>
+							<report>plugin-management</report>
+							<report>plugins</report>
+							<report>summary</report>
+							<report>index</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-plugin-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>${maven-changes-plugin.version}</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>github-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+				<configuration>
+					<onlyMilestoneIssues>false</onlyMilestoneIssues>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven-javadoc-plugin.version}</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>javadoc-no-fork</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-tdb2</artifactId>
+			<version>${ver.jena}</version>
+		</dependency>
+
+		<!-- Maven API -->
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-artifact</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<scope>${maven-api.scope}</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>maven-dependency-tree</artifactId>
+<!--			<scope>${maven-api.scope}</scope>-->
+		</dependency>
+
+		<!-- Unit testing -->
+		<dependency>
+			<groupId>org.apache.maven.plugin-testing</groupId>
+			<artifactId>maven-plugin-testing-harness</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Needed to make maven-plugin-testing-harness work -->
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-compat</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
