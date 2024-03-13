@@ -204,6 +204,6 @@ public class Tdb2MojoShared extends AbstractMojo {
             tOut.finish();
         }
 
-        mavenProjectHelper.attachArtifact(project, outputFile, "tdb2.gz");
+        mavenProjectHelper.attachArtifact(project, outputFile, "tdb2.tar.gz");
     }
 }
