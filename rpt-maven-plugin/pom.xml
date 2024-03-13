@@ -140,10 +140,10 @@
 					<groupId>net.sansa-stack</groupId>
 					<artifactId>sansa-spark-jakarta_2.12</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.aksw.jenax</groupId>
-					<artifactId>jenax-server-standalone</artifactId>
-				</exclusion>
+<!--				<exclusion>-->
+<!--					<groupId>org.aksw.jenax</groupId>-->
+<!--					<artifactId>jenax-server-standalone</artifactId>-->
+<!--				</exclusion>-->
 				<exclusion>
 					<groupId>org.apache.hadoop</groupId>
 					<artifactId>hadoop-common</artifactId>

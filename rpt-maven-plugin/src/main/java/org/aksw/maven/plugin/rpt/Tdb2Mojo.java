@@ -2,5 +2,5 @@ package org.aksw.maven.plugin.rpt;
 
 import org.apache.maven.plugins.annotations.Mojo;
 
-@Mojo(name = "integrate")
-public class SparqlMojo extends SparqlMojoShared {}
+@Mojo(name = "load-tdb2")
+public class Tdb2Mojo extends Tdb2MojoShared {}
