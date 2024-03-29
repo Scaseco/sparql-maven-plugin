@@ -1,4 +1,4 @@
-package org.aksw.maven.plugins.rpt;
+package org.aksw.maven.plugin.lsq;
 
 import java.io.File;
 
@@ -9,7 +9,7 @@ import org.apache.maven.project.MavenProject;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class TestRptMojo {
+public class TestLsqRdfizeMojo {
 
     static { JenaSystem.init(); }
 
@@ -26,9 +26,9 @@ public class TestRptMojo {
 
     @Test
     public void testMojoGoal() throws Exception {
-        File file = new File("src/test/resources/rml/test-gtfs-01");
+        File file = new File("src/test/resources/lsq/test-rdfize-01");
         MavenProject project = rule.readMavenProject(file);
-        Mojo mojo = rule.lookupConfiguredMojo(project, "rml");
+        Mojo mojo = rule.lookupConfiguredMojo(project, "rdfize");
         mojo.execute();
     }
 }

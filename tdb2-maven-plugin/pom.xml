@@ -133,6 +133,18 @@
 			<version>${ver.jena}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-core</artifactId>
+			<version>5.0.0-1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-utils</artifactId>
+			<version>0.9.8-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Maven API -->
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -162,6 +174,12 @@
 		</dependency>
 
 		<!-- Unit testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.maven.plugin-testing</groupId>
 			<artifactId>maven-plugin-testing-harness</artifactId>

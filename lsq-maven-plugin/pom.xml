@@ -10,12 +10,16 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>rpt-full-maven-plugin</artifactId>
+	<artifactId>lsq-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 
-	<name>RPT-Full Maven Plugin</name>
-	<description>Maven plugin for SPARQL and RML execution</description>
+	<description>Maven plugin for creating, loading and packaging an Apache Jena TDB2 RDF database.</description>
 	<inceptionYear>2024</inceptionYear>
+
+	<properties>
+		<ver.jena>5.0.0-rc1</ver.jena>
+		<ver.lsq>2.0.0-RC3-SNAPSHOT</ver.lsq>
+	</properties>
 
 	<prerequisites>
 		<maven>3.5</maven>
@@ -125,9 +129,16 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.aksw.maven.plugins</groupId>
-			<artifactId>rpt-maven-plugin-shared</artifactId>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-cli</artifactId>
+			<version>${ver.lsq}</version>
 		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.apache.jena</groupId>-->
+<!--			<artifactId>jena-tdb2</artifactId>-->
+<!--			<version>${ver.jena}</version>-->
+<!--		</dependency>-->
 
 		<!-- Maven API -->
 		<dependency>
@@ -158,12 +169,6 @@
 		</dependency>
 
 		<!-- Unit testing -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		
 		<dependency>
 			<groupId>org.apache.maven.plugin-testing</groupId>
 			<artifactId>maven-plugin-testing-harness</artifactId>
