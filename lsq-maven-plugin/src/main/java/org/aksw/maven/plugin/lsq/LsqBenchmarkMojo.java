@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.aksw.commons.io.util.FileUtils;
-import org.aksw.commons.io.util.UriToPathUtils;
 import org.aksw.commons.io.util.FileUtils.OverwriteMode;
+import org.aksw.commons.io.util.UriToPathUtils;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint;
@@ -70,9 +70,11 @@ public class LsqBenchmarkMojo extends AbstractMojo {
     @Component
     private MavenProjectHelper mavenProjectHelper;
 
+    /** The input log file that contains SPARQL statements */
     @Parameter
     private File logFile;
 
+    /** The list of enrichers */
     @Parameter
     private List<String> enrichers = new ArrayList<>();
 
@@ -101,8 +103,22 @@ public class LsqBenchmarkMojo extends AbstractMojo {
 
     // protected int testQueryFrequency
 
-    @Parameter(defaultValue = "${project.build.directory}/lsqdb")
+    /** If an output file is specified then the tdb2 directory becomes a sibling of it */
+    @Parameter // (defaultValue = "${project.build.directory}/lsqdb")
     private File resultTdbStore;
+
+    private void initResultTdbStore() {
+        if (resultTdbStore == null) {
+            String dirName = "lsqdb";
+            resultTdbStore = outputFile != null
+                    ? outputFile.toPath().resolveSibling(dirName).toFile()
+                    : buildDirectory.toPath().resolveSibling(dirName).toFile();
+        }
+    }
+
+    @Parameter(defaultValue = "${project.build.directory}", readonly = true)
+    private File buildDirectory;
+
 //    @Parameter(required = true)
 //    private String baseIri;
 
@@ -185,11 +201,19 @@ public class LsqBenchmarkMojo extends AbstractMojo {
     public void doExecute() throws Exception {
         Log logger = getLog();
 
+        initResultTdbStore();
+
         CmdLsqRdfizeBase rdfizeCmd = new CmdLsqRdfizeBase();
         // rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
         rdfizeCmd.noMerge = true;
         rdfizeCmd.inputLogFormat = logFormat;
         rdfizeCmd.nonOptionArgs.add(logFile.getAbsolutePath());
+
+        // Do not emit remote executions.
+        // Note: the endpoint url becomes part of the IRIs of remote executions.
+        rdfizeCmd.rdfizationLevel.queryOnly = true;
+
+        String baseIri = rdfizeCmd.baseIri;
 
         String datasetLabel = UriToPathUtils.resolvePath(datasetId).toString()
                 .replace('/', '-');
@@ -209,7 +233,7 @@ public class LsqBenchmarkMojo extends AbstractMojo {
                 .setDatasetLabel(datasetLabel)
                 ;
 
-        String tdbPath = resultTdbStore.getAbsolutePath();
+        String tdbPath = resultTdbStore.getCanonicalFile().getAbsolutePath();
         logger.info("TDB2 benchmark db location: " + tdbPath);
         Dataset resultDataset = TDB2Factory.connectDataset(tdbPath);
 

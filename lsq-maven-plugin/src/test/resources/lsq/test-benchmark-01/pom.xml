@@ -15,10 +15,10 @@
 				<artifactId>lsq-maven-plugin</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 				<configuration>
-					<!-- <serviceUrl>test</serviceUrl> -->
+					<serviceUrl>http://localhost:8154/sparql</serviceUrl>
 					<logFile>queries.rq</logFile>
 					<logFormat>sparql</logFormat>
-					<outputFile>${basedir}/../../../../../target/lsq-rdfize-01.trig</outputFile>
+					<outputFile>${basedir}/../../../../../target/lsq-benchmark-01.trig</outputFile>
 				</configuration>
 			</plugin>
 		</plugins>

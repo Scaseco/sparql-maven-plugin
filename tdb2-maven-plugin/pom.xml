@@ -123,6 +123,12 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+			</plugin>
+
 		</plugins>
 	</reporting>
 

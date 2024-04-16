@@ -9,7 +9,7 @@ import org.apache.maven.project.MavenProject;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class TestLsqRdfizeMojo {
+public class TestLsqBenchmarkMojo {
 
     static { JenaSystem.init(); }
 
@@ -18,9 +18,9 @@ public class TestLsqRdfizeMojo {
 
     @Test
     public void testMojoGoal() throws Exception {
-        File file = new File("src/test/resources/lsq/test-rdfize-01");
+        File file = new File("src/test/resources/lsq/test-benchmark-01");
         MavenProject project = rule.readMavenProject(file);
-        Mojo mojo = rule.lookupConfiguredMojo(project, "rdfize");
+        Mojo mojo = rule.lookupConfiguredMojo(project, "benchmark");
         mojo.execute();
     }
 }

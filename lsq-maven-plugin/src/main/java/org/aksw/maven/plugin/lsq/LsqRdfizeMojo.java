@@ -137,6 +137,10 @@ public class LsqRdfizeMojo extends AbstractMojo {
         rdfizeCmd.inputLogFormat = logFormat;
         rdfizeCmd.nonOptionArgs.add(logFile.getAbsolutePath());
 
+        // Do not emit remote executions.
+        // Note: the endpoint url becomes part of the IRIs of remote executions.
+        rdfizeCmd.rdfizationLevel.queryOnly = true;
+
         String baseIri = rdfizeCmd.baseIri;
         // TODO How to obtain the baseIRI? A simple hack would be to 'grep'
         // for the id part before lsqQuery
