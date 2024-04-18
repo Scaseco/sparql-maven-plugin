@@ -17,8 +17,9 @@
 	<inceptionYear>2024</inceptionYear>
 
 	<properties>
-		<ver.jena>5.0.0-rc1</ver.jena>
-		<ver.lsq>2.0.0-RC3-SNAPSHOT</ver.lsq>
+		<lsq.version>2.0.0-RC3-SNAPSHOT</lsq.version>
+
+		<jenax.version>5.0.0-1</jenax.version>
 	</properties>
 
 	<prerequisites>
@@ -129,15 +130,22 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-server-standalone</artifactId>
+			<version>${jenax.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.simba.lsq</groupId>
 			<artifactId>lsq-cli</artifactId>
-			<version>${ver.lsq}</version>
+			<version>${lsq.version}</version>
 		</dependency>
 
 <!--		<dependency>-->
 <!--			<groupId>org.apache.jena</groupId>-->
 <!--			<artifactId>jena-tdb2</artifactId>-->
-<!--			<version>${ver.jena}</version>-->
+<!--			<version>${jena.version}</version>-->
 <!--		</dependency>-->
 
 		<!-- Maven API -->

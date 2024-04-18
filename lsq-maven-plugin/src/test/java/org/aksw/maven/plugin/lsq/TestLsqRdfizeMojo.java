@@ -17,7 +17,7 @@ public class TestLsqRdfizeMojo {
     public MojoRule rule = new MojoRuleNoOp();
 
     @Test
-    public void testMojoGoal() throws Exception {
+    public void testLsqRdfize01() throws Exception {
         File file = new File("src/test/resources/lsq/test-rdfize-01");
         MavenProject project = rule.readMavenProject(file);
         Mojo mojo = rule.lookupConfiguredMojo(project, "rdfize");

@@ -17,7 +17,7 @@
 	<inceptionYear>2024</inceptionYear>
 
 	<properties>
-		<ver.jena>5.0.0-rc1</ver.jena>
+		<ver.jena>5.0.0</ver.jena>
 	</properties>
 
 	<prerequisites>
