@@ -2,6 +2,7 @@ package org.aksw.maven.plugin.lsq;
 
 import java.io.File;
 
+import org.aksw.commons.util.derby.DerbyUtils;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.MojoRule;
@@ -11,7 +12,10 @@ import org.junit.Test;
 
 public class TestLsqRdfizeMojo {
 
-    static { JenaSystem.init(); }
+    static {
+        DerbyUtils.disableDerbyLog();
+        JenaSystem.init();
+    }
 
     @Rule
     public MojoRule rule = new MojoRuleNoOp();

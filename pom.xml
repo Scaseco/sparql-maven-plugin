@@ -13,7 +13,7 @@
 		<module>rpt-maven-plugin</module>
 		<module>rpt-full-maven-plugin</module>
 		<module>tdb2-maven-plugin</module>
-		<module>sparql-maven-plugin</module>
+		<!-- <module>sparql-maven-plugin</module> -->
 		<module>lsq-maven-plugin</module>
 	</modules>
 

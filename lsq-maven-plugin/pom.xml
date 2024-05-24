@@ -17,7 +17,7 @@
 	<inceptionYear>2024</inceptionYear>
 
 	<properties>
-		<lsq.version>2.0.0-RC3-SNAPSHOT</lsq.version>
+		<lsq.version>2.0.0-RC3</lsq.version>
 
 		<jenax.version>5.0.0-1</jenax.version>
 	</properties>

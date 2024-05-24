@@ -142,13 +142,13 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-reprogen-core</artifactId>
-			<version>5.0.0-1-SNAPSHOT</version>
+			<version>5.0.0-1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-io-utils</artifactId>
-			<version>0.9.8-SNAPSHOT</version>
+			<version>0.9.8</version>
 		</dependency>
 
 		<!-- Maven API -->

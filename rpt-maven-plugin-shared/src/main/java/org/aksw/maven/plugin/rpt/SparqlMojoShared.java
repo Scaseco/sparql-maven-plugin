@@ -1,20 +1,6 @@
-/*
- * Copyright 2013 Luca Tagliani
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.aksw.maven.plugin.rpt;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +13,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
@@ -74,20 +61,35 @@ public class SparqlMojoShared extends AbstractMojo {
 
     /** Output file */
     @Parameter
-    private String outputFile;
+    private File outputFile;
+
+    @Parameter(defaultValue = "true")
+    private boolean attach;
 
     /** Output format */
     @Parameter
     private String outputFormat;
 
+    /** Classifier under which to attach the output if 'attach' is true */
+    @Parameter
+    protected String classifier;
+
+    /** Type under which to attach the output if 'attach' is true */
+    @Parameter
+    protected String type;
+
+    @Component
+    private MavenProjectHelper mavenProjectHelper;
+    
     @Override
     public void execute() throws MojoExecutionException {
         try {
             CmdSparqlIntegrateMain cmd = new CmdSparqlIntegrateMain();
             cmd.nonOptionArgs = args;
             if (outputFile != null) {
+            	String outFileStr = outputFile.getAbsolutePath();
                 cmd.outputSpec = new OutputSpec();
-                cmd.outputSpec.outFile = outputFile;
+                cmd.outputSpec.outFile = outFileStr;
             }
             cmd.engine = engine;
             cmd.outFormat = outputFormat;
@@ -95,6 +97,12 @@ public class SparqlMojoShared extends AbstractMojo {
             cmd.debugMode = true;
 
             cmd.call();
+            
+            if (attach) {
+                String t = type != null ? type : "trig";
+                mavenProjectHelper.attachArtifact(project, t, classifier, outputFile);
+            }
+
 //
 //            // create the artifact to search for
 //            Artifact artifact = new DefaultArtifact(groupId, artifactId, project.getPackaging(), "[" + startingVersion + ",)");

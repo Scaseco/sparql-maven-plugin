@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.aksw.commons.io.util.FileUtils;
 import org.aksw.commons.io.util.FileUtils.OverwriteMode;
+import org.aksw.commons.util.derby.DerbyUtils;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
@@ -34,6 +35,8 @@ import io.reactivex.rxjava3.core.Flowable;
 
 @Mojo(name = "rdfize", defaultPhase = LifecyclePhase.PACKAGE)
 public class LsqRdfizeMojo extends AbstractMojo {
+
+    static { DerbyUtils.disableDerbyLog(); }
 
     /** The repository system (Aether) which does most of the management. */
     @Component
