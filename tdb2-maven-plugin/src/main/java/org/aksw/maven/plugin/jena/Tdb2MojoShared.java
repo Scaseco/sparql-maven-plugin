@@ -24,6 +24,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.jena.dboe.base.file.Location;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -138,16 +139,12 @@ public class Tdb2MojoShared extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        try {
-            if (!skip) {
-                doExecute();
-            }
-        } catch (Exception e) {
-            throw new MojoExecutionException(e);
-        }
+    	if (!skip) {
+    		JenaMojoHelper.execJenaBasedMojo(this::executeActual);
+    	}
     }
 
-    public void doExecute() throws Exception {
+    public void executeActual() throws Exception {
         Log logger = getLog();
 // IOX.safeWriteOrCopy(null, null, null)
         // Test creation first before resolving dependencies
@@ -207,11 +204,15 @@ public class Tdb2MojoShared extends AbstractMojo {
             String graphName = mapping.getGraph();
             File file = mapping.getFile();
             String pathStr = file.getAbsolutePath();
-            UpdateLoad update = graphName == null || graphName.isBlank()
-                ? new UpdateLoad(pathStr, (Node)null)
-                : new UpdateLoad(pathStr, graphName);
+            
+            Node graphNode = graphName == null || graphName.isBlank()
+            		? null
+            		: NodeFactory.createURI(graphName);
+            
+            UpdateLoad update = new UpdateLoad(pathStr, graphNode);
 
-            logger.info("Selecting TDB2 workload: " + pathStr + " -> " + graphName);
+            String graphNodeLabel = getGraphLabel(graphNode);
+            logger.info("Selecting TDB2 workload: " + pathStr + " -> " + graphNodeLabel);
             workloads.add(update);
         }
 
@@ -236,6 +237,9 @@ public class Tdb2MojoShared extends AbstractMojo {
             for (UpdateLoad update : workloads) {
                 String source = update.getSource();
                 Node destNode = update.getDest();
+                
+                String destNodeLabel = getGraphLabel(destNode);
+                
                 // logger.info("Preparing TDB2 workload: " + update.getSource() + " -> " + update.getDest());
 
                 boolean isAlreadyLoaded = loadState.getFileStates().containsKey(source);
@@ -243,9 +247,9 @@ public class Tdb2MojoShared extends AbstractMojo {
 //                        ? false
 //                        : Txn.calculateRead(dg, () -> dg.containsGraph(destNode));
                 if (isAlreadyLoaded) {
-                    logger.info("Skipping TDB2 workload (already loaded): " + source + " -> " + destNode);
+                    logger.info("Skipping TDB2 workload (already loaded): " + source + " -> " + destNodeLabel);
                 } else {
-                    logger.info("Executing TDB2 workload: " + source + " -> " + destNode);
+                    logger.info("Executing TDB2 workload: " + source + " -> " + destNodeLabel);
                     FileState fileState = loadState.getModel().createResource().as(FileState.class);
                     if (destNode != null) {
                         fileState.getGraphs().add(destNode);
@@ -301,6 +305,10 @@ public class Tdb2MojoShared extends AbstractMojo {
         }
     }
 
+    public static String getGraphLabel(Node graphNode) {
+        String result = graphNode == null ? "(default graph)" : graphNode.toString();
+        return result;
+    }
 
     public static void atomicMoveOrCopy(Consumer<String> warnCallback, Path source, Path target) throws IOException {
         try {

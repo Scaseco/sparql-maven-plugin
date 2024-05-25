@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.maven.plugins</groupId>
 		<artifactId>rpt-maven-plugin-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1</version>
 	</parent>
 		
 	<artifactId>rpt-maven-plugin-shared</artifactId>
@@ -58,6 +58,16 @@
 			<groupId>org.aksw.rdf-processing-toolkit</groupId>
 			<artifactId>rdf-processing-toolkit-cli</artifactId>
 			<version>${rdf-processing-toolkit.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.servicemix.bundles</groupId>
+					<artifactId>org.apache.servicemix.bundles.xerces</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Unit testing -->

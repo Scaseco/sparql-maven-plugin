@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.aksw.commons.io.util.FileUtils;
 import org.aksw.commons.io.util.FileUtils.OverwriteMode;
+import org.aksw.commons.util.derby.DerbyUtils;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
@@ -34,6 +35,8 @@ import io.reactivex.rxjava3.core.Flowable;
 
 @Mojo(name = "rdfize", defaultPhase = LifecyclePhase.PACKAGE)
 public class LsqRdfizeMojo extends AbstractMojo {
+
+    static { DerbyUtils.disableDerbyLog(); }
 
     /** The repository system (Aether) which does most of the management. */
     @Component
@@ -119,16 +122,12 @@ public class LsqRdfizeMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        try {
-            if (!skip) {
-                doExecute();
-            }
-        } catch (Exception e) {
-            throw new MojoExecutionException(e);
+        if (!skip) {
+        	JenaMojoHelper.execJenaBasedMojo(this::executeActual);
         }
     }
 
-    public void doExecute() throws Exception {
+    public void executeActual() throws Exception {
         Log logger = getLog();
 
         CmdLsqRdfizeBase rdfizeCmd = new CmdLsqRdfizeBase();
@@ -136,6 +135,10 @@ public class LsqRdfizeMojo extends AbstractMojo {
         rdfizeCmd.noMerge = true;
         rdfizeCmd.inputLogFormat = logFormat;
         rdfizeCmd.nonOptionArgs.add(logFile.getAbsolutePath());
+
+        // Do not emit remote executions.
+        // Note: the endpoint url becomes part of the IRIs of remote executions.
+        rdfizeCmd.rdfizationLevel.queryOnly = true;
 
         String baseIri = rdfizeCmd.baseIri;
         // TODO How to obtain the baseIRI? A simple hack would be to 'grep'

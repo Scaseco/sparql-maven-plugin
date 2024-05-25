@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.maven.plugins</groupId>
 		<artifactId>rpt-maven-plugin-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1</version>
 	</parent>
 
 	<artifactId>tdb2-maven-plugin</artifactId>
@@ -17,7 +17,7 @@
 	<inceptionYear>2024</inceptionYear>
 
 	<properties>
-		<ver.jena>5.0.0-rc1</ver.jena>
+		<ver.jena>5.0.0</ver.jena>
 	</properties>
 
 	<prerequisites>
@@ -123,6 +123,12 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+			</plugin>
+
 		</plugins>
 	</reporting>
 
@@ -136,13 +142,13 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-reprogen-core</artifactId>
-			<version>5.0.0-1-SNAPSHOT</version>
+			<version>5.0.0-1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-io-utils</artifactId>
-			<version>0.9.8-SNAPSHOT</version>
+			<version>0.9.8</version>
 		</dependency>
 
 		<!-- Maven API -->

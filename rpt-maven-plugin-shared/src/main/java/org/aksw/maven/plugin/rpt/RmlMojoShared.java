@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import org.aksw.commons.util.derby.DerbyUtils;
 import org.aksw.rml.jena.impl.RmlToSparqlRewriteBuilder;
 import org.aksw.sparql_integrate.cli.cmd.CmdSparqlIntegrateMain;
 import org.aksw.sparql_integrate.cli.cmd.CmdSparqlIntegrateMain.OutputSpec;
@@ -19,7 +20,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.sis.system.Shutdown;
+import org.apache.maven.project.MavenProjectHelper;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
@@ -30,8 +31,6 @@ import org.eclipse.aether.resolution.ArtifactResult;
 
 @Mojo(name = "rml")
 public class RmlMojoShared extends AbstractMojo {
-
-    static { DerbyUtils.disableDerbyLog(); }
 
     /** The repository system (Aether) which does most of the management. */
     @Component
@@ -79,6 +78,9 @@ public class RmlMojoShared extends AbstractMojo {
     @Parameter
     private File outputFile;
 
+    @Parameter(defaultValue = "true")
+    private boolean attach;
+
     /** Work directory - from where to resolve relative paths in the RML mapping */
     @Parameter
     private File workDirectory;
@@ -87,11 +89,30 @@ public class RmlMojoShared extends AbstractMojo {
     @Parameter
     private String outputFormat;
 
+    /** Type under which to attach the output if 'attach' is true */
+    @Parameter
+    private String outputType;
+
+    /** Classifier under which to attach the output if 'attach' is true */
+    @Parameter
+    protected String outputClassifier;
+
+    @Parameter(property = "rpt.skip", defaultValue = "false")
+    protected boolean skip;
+
+    @Component
+    private MavenProjectHelper mavenProjectHelper;
+
     @Override
     public void execute() throws MojoExecutionException {
+    	if (!skip) {
+    		JenaMojoHelper.execJenaBasedMojo(this::executeActual);
+    	}
+    }
+    
+    public void executeActual() throws Exception {
         Log logger = getLog();
 
-        try {
 //            Artifact artifact = new DefaultArtifact("dcat.org.coypu.data.disasters", "disasters", "dcat", "ttl.bz2", "0.20240220.0016-1");
 //            logger.info("################################");
 //            resolveArtifact(artifact);
@@ -101,66 +122,70 @@ public class RmlMojoShared extends AbstractMojo {
 //    project.getDependencies().add(toDependency(artifact, "compile"));
 
 
-            RmlToSparqlRewriteBuilder builder = new RmlToSparqlRewriteBuilder();
+        RmlToSparqlRewriteBuilder builder = new RmlToSparqlRewriteBuilder();
 
-            for (Mapping mapping : mappings) {
-                String type = mapping.getType();
-                String value = mapping.getValue();
-                if ("file".equalsIgnoreCase(type)) {
-                    builder.addRmlFile(value);
-                } else if(type == null || "inline".equals(type) || type.isBlank()) {
-                    logger.info("Adding RML String: " + value);
-                    builder.addRmlString(value);
-                } else {
-                    throw new RuntimeException("Unknown mapping type: " + type);
-                }
-            }
-
-            List<Entry<Query, String>> labeledQueries = builder.generate();
-
-            logger.info("Generated " + labeledQueries.size() + " queries");
-
-            // TODO Introduce a proper builder at sparql integrate!
-            CmdSparqlIntegrateMain cmd = new CmdSparqlIntegrateMain();
-
-            if (workDirectory != null) {
-                cmd.nonOptionArgs.add("cwd=" + workDirectory.getAbsolutePath());
-            }
-
-            for (Entry<Query, String> entry : labeledQueries) {
-                Query query = entry.getKey();
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Enqueuing query: " + query);
-                }
-
-                cmd.nonOptionArgs.add(query.toString());
-            }
-
-            if (outputFile != null) {
-                cmd.outputSpec = new OutputSpec();
-                cmd.outputSpec.outFile = outputFile.getAbsolutePath();
-                cmd.outMkDirs = true;
-            }
-            // cmd.engine = engine;
-            cmd.outFormat = outputFormat;
-            cmd.env = env;
-            cmd.debugMode = true;
-
-            cmd.call();
-
-            // If the engine is sansa, then we need to run CmdSansaQuery rather than CmdRptIntegrate
-            // There should be a common abstraction
-
-        } catch (Exception ex) {
-            throw new MojoExecutionException("Error in plugin", ex); //ex.getCause());
-        } finally {
-            try {
-                Shutdown.stop((Class<?>)null);
-            } catch (Exception e) {
-                logger.error("Error during shutdown of Apache SIS", e);
+        for (Mapping mapping : mappings) {
+            String type = mapping.getType();
+            String value = mapping.getValue();
+            if ("file".equalsIgnoreCase(type)) {
+                builder.addRmlFile(value);
+            } else if(type == null || "inline".equals(type) || type.isBlank()) {
+                logger.info("Adding RML String: " + value);
+                builder.addRmlString(value);
+            } else {
+                throw new RuntimeException("Unknown mapping type: " + type);
             }
         }
+
+        List<Entry<Query, String>> labeledQueries = builder.generate();
+
+        logger.info("Generated " + labeledQueries.size() + " queries");
+
+        // TODO Introduce a proper builder at sparql integrate!
+        CmdSparqlIntegrateMain cmd = new CmdSparqlIntegrateMain();
+
+        if (workDirectory != null) {
+            cmd.nonOptionArgs.add("cwd=" + workDirectory.getAbsolutePath());
+        }
+
+        for (Entry<Query, String> entry : labeledQueries) {
+            Query query = entry.getKey();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Enqueuing query: " + query);
+            }
+
+            cmd.nonOptionArgs.add(query.toString());
+        }
+
+        if (outputFile != null) {
+            cmd.outputSpec = new OutputSpec();
+            cmd.outputSpec.outFile = outputFile.getAbsolutePath();
+            cmd.outMkDirs = true;
+        }
+        
+        String f = Stream.of(outputFormat, outputType)
+        		.filter(Objects::nonNull)
+        		.findFirst().orElse(null);
+
+        // cmd.engine = engine;
+        cmd.outFormat = f;
+        cmd.env = env;
+        cmd.debugMode = true;
+
+        cmd.call();
+
+        if (attach && outputFile != null) {
+        	// TODO Use SparqlSciptProcessor (or its utils) to determine an absent output format
+        	// from arguments
+            String t = Stream.of(outputType, outputFormat)
+            		.filter(Objects::nonNull)
+            		.findFirst().orElse("trig");
+            mavenProjectHelper.attachArtifact(project, t, outputClassifier, outputFile);
+        }
+
+        // If the engine is sansa, then we need to run CmdSansaQuery rather than CmdRptIntegrate
+        // There should be a common abstraction
     }
 
     /** Resolve an artifact based on the provided configuration */

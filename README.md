@@ -16,5 +16,3 @@ Typically, `rpt-maven-plugin` should be sufficient for most tasks.
 `rpt-full-maven-plugin` includes a shaded version of Apache Spark which can be used to ingest certain input formats (multiline CSV, trig, JSON arrays, JSON sequences) in parallel.
 
 
-
-
