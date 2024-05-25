@@ -16,13 +16,14 @@
 	<description>Common code for variants of the rpt-maven-plugin</description>
 	<inceptionYear>2024</inceptionYear>
 
+<!--
 	<scm>
 		<connection>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</connection>
 		<developerConnection>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</developerConnection>
 		<url>https://github.com/Scaseco/sparql-maven-plugin.git</url>
 		<tag>HEAD</tag>
 	</scm>
-
+-->
 	<dependencies>
 		<!-- Maven API -->
 		<dependency>
