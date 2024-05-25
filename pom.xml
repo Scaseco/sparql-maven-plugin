@@ -54,6 +54,7 @@
 		<maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
 
 		<nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+		<gitflow-maven-plugin.version>1.9.0</gitflow-maven-plugin.version>
 	</properties>
 
 	<licenses>
@@ -78,6 +79,19 @@
 	</developers>
 
 	<build>
+		<plugins>
+		        <plugin>
+                                <groupId>com.amashchenko.maven.plugin</groupId>
+                                <artifactId>gitflow-maven-plugin</artifactId>
+                                <version>${gitflow-maven-plugin.version}</version>
+                                <configuration>
+                                        <gitFlowConfig>
+                                                <versionTagPrefix>v</versionTagPrefix>
+						<productionBranch>main</productionBranch>
+                                        </gitFlowConfig>
+                                </configuration>
+                        </plugin>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
