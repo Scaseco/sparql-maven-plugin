@@ -18,7 +18,7 @@
 	</modules>
 
 	<properties>
-		<rdf-processing-toolkit.version>1.9.8-SNAPSHOT</rdf-processing-toolkit.version>
+		<rdf-processing-toolkit.version>1.9.8</rdf-processing-toolkit.version>
 
 		<!--		<maven-api.version>3.6.1</maven-api.version>-->
 		<maven-api.version>3.9.6</maven-api.version>
