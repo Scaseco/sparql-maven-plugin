@@ -122,16 +122,12 @@ public class LsqRdfizeMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        try {
-            if (!skip) {
-                doExecute();
-            }
-        } catch (Exception e) {
-            throw new MojoExecutionException(e);
+        if (!skip) {
+        	JenaMojoHelper.execJenaBasedMojo(this::executeActual);
         }
     }
 
-    public void doExecute() throws Exception {
+    public void executeActual() throws Exception {
         Log logger = getLog();
 
         CmdLsqRdfizeBase rdfizeCmd = new CmdLsqRdfizeBase();

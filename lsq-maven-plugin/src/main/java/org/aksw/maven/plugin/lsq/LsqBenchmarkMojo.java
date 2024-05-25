@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.aksw.commons.io.util.UriToPathUtils;
-import org.aksw.commons.util.derby.DerbyUtils;
 import org.aksw.commons.util.string.FileName;
 import org.aksw.commons.util.string.FileNameParser;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
@@ -64,8 +63,6 @@ import io.reactivex.rxjava3.core.Flowable;
 
 @Mojo(name = "benchmark", defaultPhase = LifecyclePhase.PACKAGE)
 public class LsqBenchmarkMojo extends AbstractMojo {
-
-    static { DerbyUtils.disableDerbyLog(); }
 
     /** The repository system (Aether) which does most of the management. */
     @Component
@@ -220,17 +217,12 @@ public class LsqBenchmarkMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        try {
-            if (!skip) {
-                doExecute();
-            }
-        } catch (Exception e) {
-            throw new MojoExecutionException(e);
+        if (!skip) {
+        	JenaMojoHelper.execJenaBasedMojo(this::executeActual);
         }
     }
 
-
-    public void doExecute() throws Exception {
+    public void executeActual() throws Exception {
         Log logger = getLog();
 
 //        Node metaGraphNode = metaGraph != null && !metaGraph.isBlank()
