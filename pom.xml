@@ -5,17 +5,46 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw.maven.plugins</groupId>
 	<artifactId>rpt-maven-plugin-parent</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<modules>
-		<module>rpt-maven-plugin-shared</module>
-		<module>rpt-maven-plugin</module>
-		<module>rpt-full-maven-plugin</module>
-		<module>tdb2-maven-plugin</module>
-		<!-- <module>sparql-maven-plugin</module> -->
-		<module>lsq-maven-plugin</module>
-	</modules>
+        <name>RDF Maven Plugins</name>
+        <description>A collection of Maven Plugins for assisting with RDF processing</description>
+        <url>https://github.com/Scaseco/rpt-maven-plugin</url>
+
+	<scm>
+		<connection>scm:git:git@github.com:Scaseco/rpt-maven-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:Scaseco/rpt-maven-plugin.git</developerConnection>
+		<url>https://github.com/Scaseco/rpt-maven-plugin.git</url>
+		<tag>HEAD</tag>
+	</scm>
+
+        <issueManagement>
+                <url>https://github.com/Scaseco/rpt-maven-plugin/issues</url>
+                <system>GitHub</system>
+        </issueManagement>
+
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>claus.stadler</id>
+			<name>Claus Stadler</name>
+			<email>cstadler@informatik.uni-leipzig.de</email>
+			<roles>
+				<role>Project Lead</role>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
 
 	<properties>
 		<rdf-processing-toolkit.version>1.9.8</rdf-processing-toolkit.version>
@@ -57,26 +86,14 @@
 		<gitflow-maven-plugin.version>1.9.0</gitflow-maven-plugin.version>
 	</properties>
 
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
-	<developers>
-		<developer>
-			<id>claus.stadler</id>
-			<name>Claus Stadler</name>
-			<email>cstadler@informatik.uni-leipzig.de</email>
-			<roles>
-				<role>Project Lead</role>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-	</developers>
+	<modules>
+		<module>rpt-maven-plugin-shared</module>
+		<module>rpt-maven-plugin</module>
+		<module>rpt-full-maven-plugin</module>
+		<module>tdb2-maven-plugin</module>
+		<!-- <module>sparql-maven-plugin</module> -->
+		<module>lsq-maven-plugin</module>
+	</modules>
 
 	<build>
 		<plugins>

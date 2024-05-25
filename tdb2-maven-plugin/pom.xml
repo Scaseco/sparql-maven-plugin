@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.maven.plugins</groupId>
 		<artifactId>rpt-maven-plugin-parent</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>tdb2-maven-plugin</artifactId>
@@ -24,6 +24,7 @@
 		<maven>3.5</maven>
 	</prerequisites>
 
+<!--
 	<scm>
 		<connection>scm:git:git@github.com:Scaseco/sparql-maven-plugin.git</connection>
 		<developerConnection>
@@ -31,7 +32,7 @@
 		<url>https://github.com/Scaseco/sparql-maven-plugin.git</url>
 		<tag>HEAD</tag>
 	</scm>
-
+-->
 	<build>
 		<resources>
 			<resource>
