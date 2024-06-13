@@ -8,9 +8,9 @@
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-        <name>RDF Maven Plugins</name>
-        <description>A collection of Maven Plugins for assisting with RDF processing</description>
-        <url>https://github.com/Scaseco/rpt-maven-plugin</url>
+	<name>RDF Maven Plugins</name>
+	<description>A collection of Maven Plugins for assisting with RDF processing</description>
+	<url>https://github.com/Scaseco/rpt-maven-plugin</url>
 
 	<scm>
 		<connection>scm:git:git@github.com:Scaseco/rpt-maven-plugin.git</connection>
@@ -19,10 +19,10 @@
 		<tag>HEAD</tag>
 	</scm>
 
-        <issueManagement>
-                <url>https://github.com/Scaseco/rpt-maven-plugin/issues</url>
-                <system>GitHub</system>
-        </issueManagement>
+	<issueManagement>
+		<url>https://github.com/Scaseco/rpt-maven-plugin/issues</url>
+		<system>GitHub</system>
+	</issueManagement>
 
 
 	<licenses>
@@ -54,7 +54,7 @@
 		<maven-plugin-annotations.version>3.11.0</maven-plugin-annotations.version>
 		<maven-plugin-testing-harness.version>3.3.0</maven-plugin-testing-harness.version>
 		<maven-api.scope>provided</maven-api.scope>
-<!--		<maven-api.scope>compile</maven-api.scope>-->
+		<!--		<maven-api.scope>compile</maven-api.scope>-->
 		<site.skin.version>1.3.2</site.skin.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -93,21 +93,22 @@
 		<module>tdb2-maven-plugin</module>
 		<!-- <module>sparql-maven-plugin</module> -->
 		<module>lsq-maven-plugin</module>
+		<module>mvnize-maven-plugin</module>
 	</modules>
 
 	<build>
 		<plugins>
-		        <plugin>
-                                <groupId>com.amashchenko.maven.plugin</groupId>
-                                <artifactId>gitflow-maven-plugin</artifactId>
-                                <version>${gitflow-maven-plugin.version}</version>
-                                <configuration>
-                                        <gitFlowConfig>
-                                                <versionTagPrefix>v</versionTagPrefix>
+			<plugin>
+				<groupId>com.amashchenko.maven.plugin</groupId>
+				<artifactId>gitflow-maven-plugin</artifactId>
+				<version>${gitflow-maven-plugin.version}</version>
+				<configuration>
+					<gitFlowConfig>
+						<versionTagPrefix>v</versionTagPrefix>
 						<productionBranch>main</productionBranch>
-                                        </gitFlowConfig>
-                                </configuration>
-                        </plugin>
+					</gitFlowConfig>
+				</configuration>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -120,7 +121,7 @@
 						<encoding>${project.build.sourceEncoding}</encoding>
 					</configuration>
 				</plugin>
-				
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-scm-publish-plugin</artifactId>
@@ -195,7 +196,7 @@
 				<artifactId>rpt-maven-plugin-shared</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+
 			<!-- Maven API -->
 			<dependency>
 				<groupId>org.apache.maven</groupId>
@@ -221,14 +222,14 @@
 				<version>${maven-plugin-annotations.version}</version>
 				<scope>${maven-api.scope}</scope>
 			</dependency>
-	
+
 			<dependency>
 				<groupId>org.apache.maven.shared</groupId>
 				<artifactId>maven-dependency-tree</artifactId>
 				<version>3.2.1</version>
-	<!--			<scope>${maven-api.scope}</scope>-->
+				<!--			<scope>${maven-api.scope}</scope>-->
 			</dependency>
-	
+
 			<!-- Unit testing -->
 			<dependency>
 				<groupId>junit</groupId>
@@ -242,7 +243,7 @@
 				<version>${maven-plugin-testing-harness.version}</version>
 				<scope>test</scope>
 			</dependency>
-	
+
 			<!-- Needed to make maven-plugin-testing-harness work -->
 			<dependency>
 				<groupId>org.apache.maven</groupId>
@@ -294,14 +295,15 @@
 			<url>https://maven.aksw.org/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
-	
+
 	<profiles>
 		<profile>
 			<id>release</id>
 			<distributionManagement>
 				<repository>
 					<id>ossrh</id>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+					<url>
+						https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
 
