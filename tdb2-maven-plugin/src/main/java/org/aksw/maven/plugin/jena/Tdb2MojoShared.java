@@ -139,9 +139,9 @@ public class Tdb2MojoShared extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-    	if (!skip) {
-    		JenaMojoHelper.execJenaBasedMojo(this::executeActual);
-    	}
+        if (!skip) {
+            JenaMojoHelper.execJenaBasedMojo(this::executeActual);
+        }
     }
 
     public void executeActual() throws Exception {
@@ -204,11 +204,11 @@ public class Tdb2MojoShared extends AbstractMojo {
             String graphName = mapping.getGraph();
             File file = mapping.getFile();
             String pathStr = file.getAbsolutePath();
-            
+
             Node graphNode = graphName == null || graphName.isBlank()
-            		? null
-            		: NodeFactory.createURI(graphName);
-            
+                    ? null
+                    : NodeFactory.createURI(graphName);
+
             UpdateLoad update = new UpdateLoad(pathStr, graphNode);
 
             String graphNodeLabel = getGraphLabel(graphNode);
@@ -237,9 +237,9 @@ public class Tdb2MojoShared extends AbstractMojo {
             for (UpdateLoad update : workloads) {
                 String source = update.getSource();
                 Node destNode = update.getDest();
-                
+
                 String destNodeLabel = getGraphLabel(destNode);
-                
+
                 // logger.info("Preparing TDB2 workload: " + update.getSource() + " -> " + update.getDest());
 
                 boolean isAlreadyLoaded = loadState.getFileStates().containsKey(source);
@@ -324,6 +324,8 @@ public class Tdb2MojoShared extends AbstractMojo {
             BufferedOutputStream buffOut = new BufferedOutputStream(fOut);
             GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
             TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut)) {
+            tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+            tOut.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
 
             Files.walkFileTree(folderToPackage, new FileVisitor<Path>() {
                 @Override
