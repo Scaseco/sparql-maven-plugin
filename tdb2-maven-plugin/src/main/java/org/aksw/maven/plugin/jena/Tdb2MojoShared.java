@@ -487,13 +487,13 @@ public class Tdb2MojoShared extends AbstractMojo {
     }
 
     public Path relativizeAgainstPom(File file) {
-        Path pom = project.getFile().toPath();
+        Path pom = project.getFile().toPath().getParent();
         Path result = pom.relativize(file.toPath());
         return result;
     }
 
     public Path resolveAgainstPom(Path path) {
-        Path pom = project.getFile().toPath();
+        Path pom = project.getFile().toPath().getParent();
         Path result = pom.resolve(path);
         return result;
     }
