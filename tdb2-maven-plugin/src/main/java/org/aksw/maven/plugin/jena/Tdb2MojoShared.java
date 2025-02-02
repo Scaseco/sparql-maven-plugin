@@ -10,15 +10,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import org.aksw.commons.io.util.FileUtils;
-import org.aksw.commons.io.util.FileUtils.OverwriteMode;
+import org.aksw.commons.io.util.FileUtils.OverwritePolicy;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
@@ -146,7 +151,7 @@ public class Tdb2MojoShared extends AbstractMojo {
 
     public void executeActual() throws Exception {
         Log logger = getLog();
-// IOX.safeWriteOrCopy(null, null, null)
+
         // Test creation first before resolving dependencies
         Path outputPath = outputFolder.toPath();
         Location location = Location.create(outputPath);
@@ -259,7 +264,7 @@ public class Tdb2MojoShared extends AbstractMojo {
                     Txn.executeWrite(dg, () -> {
                         UpdateExec.dataset(dg).update(update).execute();
                         try {
-                            FileUtils.safeCreate(loadStatePath, OverwriteMode.OVERWRITE, out -> {
+                            FileUtils.safeCreate(loadStatePath, OverwritePolicy.OVERWRITE, out -> {
                                 RDFDataMgr.write(out, loadState.getModel(), RDFFormat.TURTLE_PRETTY);
                             });
                         } catch (Exception e) {
@@ -293,8 +298,12 @@ public class Tdb2MojoShared extends AbstractMojo {
             if (Files.exists(tgtFile) && !change[0]) {
                 logger.info("No changes detected. Archive already exists: " + tgtFile);
             } else {
+                Path relPath = project.getFile().toPath().getParent();
                 logger.info("Writing temp archive: " + tgtTmpFile);
-                packageTdb2(logger::info, tgtTmpFile, outputFolderPath);
+                logger.info("Shown paths are relative to: " + relPath);
+
+                Map<String, Path> fileSet = createTdb2FileSet(outputFolderPath);
+                packageTdb2(logger::info, tgtTmpFile, fileSet, relPath);
                 atomicMoveOrCopy(logger::warn, tgtTmpFile, tgtFile);
                 logger.info("Created archive: " + tgtFile);
             }
@@ -319,7 +328,57 @@ public class Tdb2MojoShared extends AbstractMojo {
         }
     }
 
-    public static void packageTdb2(Consumer<String> fileCallback, Path fileToWrite, Path folderToPackage) throws IOException {
+    public static Map<String, Path> createTdb2FileSet(Path folderToPackage) throws IOException {
+        Map<String, Path> result = new LinkedHashMap<>();
+        Files.walkFileTree(folderToPackage, new FileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                // Skip lock files
+                if (!file.getFileName().toString().endsWith(".lock")) {
+                    Path relPath =  folderToPackage.relativize(file);
+                    result.put(relPath.toString(), file);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                throw new RuntimeException(exc);
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return result;
+    }
+
+    public static long totalSize(Iterator<Path> files) throws IOException {
+        long result = 0;
+        while (files.hasNext()) {
+            Path path = files.next();
+            result += Files.size(path);
+        }
+        return result;
+    }
+
+    private static class Tracker {
+        long   totalSize = -1;
+        int    fileCount = -1;
+        long   totalProgress = 0;
+        String currentFileName = null;
+        int    currentFileIdx = 0;
+        long   currentFileSize = -1;
+        long   currentFileProgress = -1;
+    }
+
+    public static void packageTdb2(Consumer<String> fileCallback, Path fileToWrite, Map<String, Path> fileSet, Path basePath) throws IOException {
         try (OutputStream fOut = Files.newOutputStream(fileToWrite);
             BufferedOutputStream buffOut = new BufferedOutputStream(fOut);
             GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
@@ -327,39 +386,92 @@ public class Tdb2MojoShared extends AbstractMojo {
             tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
             tOut.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
 
-            Files.walkFileTree(folderToPackage, new FileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    return FileVisitResult.CONTINUE;
-                }
+            Tracker tracker = new Tracker();
+            tracker.totalSize = totalSize(fileSet.values().iterator());
+            tracker.fileCount = fileSet.size();
 
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    // Skip lock files
-                    if (!file.getFileName().toString().endsWith(".lock")) {
-                        Path relPath =  folderToPackage.relativize(file);
-                        TarArchiveEntry tarEntry = new TarArchiveEntry(file, relPath.toString());
-                        tOut.putArchiveEntry(tarEntry);
-                        fileCallback.accept("Adding: " + file);
-                        Files.copy(file, tOut);
-                        tOut.closeArchiveEntry();
+            long startTime = System.currentTimeMillis();
+
+            TimeOutDeferredAction scheduler = TimeOutDeferredAction.of(
+                Duration.ofSeconds(10).toMillis(),
+                () -> {
+                    float fileRatio = tracker.currentFileSize == 0
+                        ? 1.0f
+                        : tracker.currentFileProgress / (float)tracker.currentFileSize;
+
+                    float totalRatio = tracker.totalSize == 0
+                        ? 1.0f
+                        : tracker.totalProgress / (float)tracker.totalSize;
+
+                    long elapsedTime = System.currentTimeMillis();
+
+                    float duration = (elapsedTime - startTime) * 0.001f;
+                    float throughput = tracker.totalProgress / (float)duration;
+                    long remaining = tracker.totalSize - tracker.totalProgress;
+                    long etaInSeconds = (long)(remaining / throughput);
+                    if (etaInSeconds == 0 && remaining > 0) {
+                        etaInSeconds = 1;
                     }
-                    return FileVisitResult.CONTINUE;
-                }
+                    String etaStr = toString(Duration.ofSeconds(etaInSeconds));
 
-                @Override
-                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                    throw new RuntimeException(exc);
-                }
+                    String msg = String.format("Adding file %d/%d %s %.2f%% - Total %.2f%% - ETA %s",
+                            tracker.currentFileIdx, tracker.fileCount, tracker.currentFileName,
+                            fileRatio * 100.0f, totalRatio * 100.0f, etaStr);
 
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+                    fileCallback.accept(msg);
+                });
+
+            for (Entry<String, Path> e : fileSet.entrySet()) {
+                String relPathStr = e.getKey();
+                Path file = e.getValue();
+
+                Path displayPath = basePath == null ? file : basePath.relativize(file);
+
+                ++tracker.currentFileIdx;
+                tracker.currentFileProgress = 0;
+                tracker.currentFileName = displayPath.toString();
+                tracker.currentFileSize = Files.size(file);
+
+                TarArchiveEntry tarEntry = new TarArchiveEntry(file, relPathStr);
+                tOut.putArchiveEntry(tarEntry);
+                FileUtils.copy(file, tOut, contribBytes -> {
+                    tracker.currentFileProgress += contribBytes;
+                    tracker.totalProgress += contribBytes;
+                    scheduler.tick();
+                });
+                scheduler.forceTick();
+                tOut.closeArchiveEntry();
+            }
 
             tOut.finish();
         }
+    }
+
+    public static String toString(Duration eta) {
+        int s = eta.toSecondsPart();
+        int m = eta.toMinutesPart();
+        int h = eta.toHoursPart();
+        long d = eta.toDaysPart();
+
+        StringBuilder b = new StringBuilder();
+        if (d != 0) {
+            if (!b.isEmpty()) { b.append(" "); }
+            b.append(d).append("d");
+        }
+
+        if (h != 0) {
+            if (!b.isEmpty()) { b.append(" "); }
+            b.append(h).append("h");
+        }
+
+        if (m != 0) { // d != 0 || h != 0 ||
+            if (!b.isEmpty()) { b.append(" "); }
+            b.append(m).append("m");
+        }
+
+        if (!b.isEmpty()) { b.append(" "); }
+        b.append(s).append("s");
+        return b.toString();
     }
 
     protected String toString(Artifact coord) {
@@ -371,6 +483,18 @@ public class Tdb2MojoShared extends AbstractMojo {
                 (c == null || c.isEmpty() ? "" : ":" + c);
 
         String result = coord.getGroupId() + ":" + coord.getArtifactId() + ":" + coord.getVersion() + suffix;
+        return result;
+    }
+
+    public Path relativizeAgainstPom(File file) {
+        Path pom = project.getFile().toPath();
+        Path result = pom.relativize(file.toPath());
+        return result;
+    }
+
+    public Path resolveAgainstPom(Path path) {
+        Path pom = project.getFile().toPath();
+        Path result = pom.resolve(path);
         return result;
     }
 }

@@ -149,7 +149,7 @@
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-io-utils</artifactId>
-			<version>0.9.8</version>
+			<version>0.9.10-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Maven API -->
