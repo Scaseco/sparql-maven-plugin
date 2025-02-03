@@ -22,7 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 
 import org.aksw.commons.io.util.FileUtils;
 import org.aksw.commons.io.util.FileUtils.OverwritePolicy;
@@ -63,6 +68,8 @@ import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
+
+import com.google.common.io.CountingInputStream;
 
 @Mojo(name = "load", defaultPhase = LifecyclePhase.PACKAGE)
 public class Tdb2MojoShared extends AbstractMojo {
@@ -374,13 +381,17 @@ public class Tdb2MojoShared extends AbstractMojo {
         int    maxDataPoints = 10;
         Deque<Entry<Long, Long>> timeAndTotalProgress = new ArrayDeque<>(maxDataPoints);
 
+
         long   totalSize = -1;
         int    fileCount = -1;
-        long   totalProgress = 0;
+        long   currentFileStartProgress = 0; // Progress before the current file
+        LongSupplier currentFileProgress;
+        // totalProgress = currentFileStartProgress + currentFileProgress.getAsLong()
+
         String currentFileName = null;
         int    currentFileIdx = 0;
         long   currentFileSize = -1;
-        long   currentFileProgress = -1;
+        // long   currentFileProgress = -1;
     }
 
     public static void packageTdb2(Consumer<String> fileCallback, Path fileToWrite, Map<String, Path> fileSet, Path basePath) throws IOException {
@@ -396,71 +407,75 @@ public class Tdb2MojoShared extends AbstractMojo {
             tracker.fileCount = fileSet.size();
 
             // long startTime = System.currentTimeMillis();
+            Runnable monitorProgress = () -> {
+                long elapsedTime = System.currentTimeMillis();
+                long currentFileProgress = tracker.currentFileProgress.getAsLong();
+                long totalProgress = tracker.currentFileStartProgress + currentFileProgress;
 
-            TimeOutDeferredAction scheduler = TimeOutDeferredAction.of(
-                Duration.ofSeconds(10).toMillis(),
-                () -> {
-                    long elapsedTime = System.currentTimeMillis();
-                    long totalProgress = tracker.totalProgress;
+                float fileRatio = tracker.currentFileSize == 0
+                    ? 1.0f
+                    : currentFileProgress / (float)tracker.currentFileSize;
 
-                    float fileRatio = tracker.currentFileSize == 0
-                        ? 1.0f
-                        : tracker.currentFileProgress / (float)tracker.currentFileSize;
+                float totalRatio = tracker.totalSize == 0
+                    ? 1.0f
+                    : totalProgress / (float)tracker.totalSize;
 
-                    float totalRatio = tracker.totalSize == 0
-                        ? 1.0f
-                        : totalProgress / (float)tracker.totalSize;
+                Deque<Entry<Long, Long>> points = tracker.timeAndTotalProgress;
+                if (points.size() >= tracker.maxDataPoints) {
+                    points.removeFirst();
+                }
+                Entry<Long, Long> newEntry = Map.entry(elapsedTime, totalProgress);
+                points.addLast(newEntry);
+                Entry<Long, Long> oldEntry = points.getFirst();
 
-                    Deque<Entry<Long, Long>> points = tracker.timeAndTotalProgress;
-                    if (points.size() >= tracker.maxDataPoints) {
-                        points.removeFirst();
+                float relDuration = (newEntry.getKey() - oldEntry.getKey()) * 0.001f; // ms to seconds
+                long relAmount = newEntry.getValue() - oldEntry.getValue();
+                float throughput = relDuration < 0.001f ? 0f : relAmount / relDuration;
+
+                long remaining = tracker.totalSize - totalProgress;
+                long etaInSeconds = throughput < 0.001f ? Long.MAX_VALUE : (long)(remaining / throughput);
+                if (etaInSeconds == 0 && remaining > 0) {
+                    etaInSeconds = 1;
+                }
+                String etaStr = etaInSeconds == Long.MAX_VALUE
+                        ? "infinite"
+                        : toString(Duration.ofSeconds(etaInSeconds));
+
+                String msg = String.format("Adding file %d/%d %s %.2f%% - Total %.2f%% - ETA %s",
+                        tracker.currentFileIdx, tracker.fileCount, tracker.currentFileName,
+                        fileRatio * 100.0f, totalRatio * 100.0f, etaStr);
+
+                fileCallback.accept(msg);
+            };
+
+            ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
+            try {
+                for (Entry<String, Path> e : fileSet.entrySet()) {
+                    String relPathStr = e.getKey();
+                    Path file = e.getValue();
+
+                    Path displayPath = basePath == null ? file : basePath.relativize(file);
+
+                    ++tracker.currentFileIdx;
+                    tracker.currentFileName = displayPath.toString();
+                    tracker.currentFileSize = Files.size(file);
+
+                    TarArchiveEntry tarEntry = new TarArchiveEntry(file, relPathStr);
+                    tOut.putArchiveEntry(tarEntry);
+
+                    try (CountingInputStream cin = new CountingInputStream(Files.newInputStream(file))) {
+                        tracker.currentFileProgress = () -> cin.getCount();
+                        ScheduledFuture<?> future = ses.scheduleAtFixedRate(monitorProgress, 1, 10, TimeUnit.SECONDS);
+                        cin.transferTo(tOut);
+                        future.cancel(false);
                     }
-                    Entry<Long, Long> newEntry = Map.entry(elapsedTime, totalProgress);
-                    points.addLast(newEntry);
-                    Entry<Long, Long> oldEntry = points.getFirst();
-
-                    float relDuration = (newEntry.getKey() - oldEntry.getKey()) * 0.001f; // ms to seconds
-                    long relAmount = newEntry.getValue() - oldEntry.getValue();
-                    float throughput = relDuration < 0.001f ? 0f : relAmount / relDuration;
-
-                    long remaining = tracker.totalSize - totalProgress;
-                    long etaInSeconds = throughput < 0.001f ? Long.MAX_VALUE : (long)(remaining / throughput);
-                    if (etaInSeconds == 0 && remaining > 0) {
-                        etaInSeconds = 1;
-                    }
-                    String etaStr = etaInSeconds == Long.MAX_VALUE
-                            ? "infinite"
-                            : toString(Duration.ofSeconds(etaInSeconds));
-
-                    String msg = String.format("Adding file %d/%d %s %.2f%% - Total %.2f%% - ETA %s",
-                            tracker.currentFileIdx, tracker.fileCount, tracker.currentFileName,
-                            fileRatio * 100.0f, totalRatio * 100.0f, etaStr);
-
-                    fileCallback.accept(msg);
-                });
-
-            for (Entry<String, Path> e : fileSet.entrySet()) {
-                String relPathStr = e.getKey();
-                Path file = e.getValue();
-
-                Path displayPath = basePath == null ? file : basePath.relativize(file);
-
-                ++tracker.currentFileIdx;
-                tracker.currentFileProgress = 0;
-                tracker.currentFileName = displayPath.toString();
-                tracker.currentFileSize = Files.size(file);
-
-                TarArchiveEntry tarEntry = new TarArchiveEntry(file, relPathStr);
-                tOut.putArchiveEntry(tarEntry);
-                FileUtils.copy(file, tOut, contribBytes -> {
-                    tracker.currentFileProgress += contribBytes;
-                    tracker.totalProgress += contribBytes;
-                    scheduler.tick();
-                });
-                scheduler.forceTick();
-                tOut.closeArchiveEntry();
+                    monitorProgress.run();
+                    tracker.currentFileStartProgress += tracker.currentFileProgress.getAsLong();
+                    tOut.closeArchiveEntry();
+                }
+            } finally {
+                ses.shutdown();
             }
-
             tOut.finish();
         }
     }
