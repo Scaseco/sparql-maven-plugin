@@ -11,8 +11,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -369,6 +371,9 @@ public class Tdb2MojoShared extends AbstractMojo {
     }
 
     private static class Tracker {
+        int    maxDataPoints = 10;
+        Deque<Entry<Long, Long>> timeAndTotalProgress = new ArrayDeque<>(maxDataPoints);
+
         long   totalSize = -1;
         int    fileCount = -1;
         long   totalProgress = 0;
@@ -390,29 +395,42 @@ public class Tdb2MojoShared extends AbstractMojo {
             tracker.totalSize = totalSize(fileSet.values().iterator());
             tracker.fileCount = fileSet.size();
 
-            long startTime = System.currentTimeMillis();
+            // long startTime = System.currentTimeMillis();
 
             TimeOutDeferredAction scheduler = TimeOutDeferredAction.of(
                 Duration.ofSeconds(10).toMillis(),
                 () -> {
+                    long elapsedTime = System.currentTimeMillis();
+                    long totalProgress = tracker.totalProgress;
+
                     float fileRatio = tracker.currentFileSize == 0
                         ? 1.0f
                         : tracker.currentFileProgress / (float)tracker.currentFileSize;
 
                     float totalRatio = tracker.totalSize == 0
                         ? 1.0f
-                        : tracker.totalProgress / (float)tracker.totalSize;
+                        : totalProgress / (float)tracker.totalSize;
 
-                    long elapsedTime = System.currentTimeMillis();
+                    Deque<Entry<Long, Long>> points = tracker.timeAndTotalProgress;
+                    if (points.size() >= tracker.maxDataPoints) {
+                        points.removeFirst();
+                    }
+                    Entry<Long, Long> newEntry = Map.entry(elapsedTime, totalProgress);
+                    points.addLast(newEntry);
+                    Entry<Long, Long> oldEntry = points.getFirst();
 
-                    float duration = (elapsedTime - startTime) * 0.001f;
-                    float throughput = tracker.totalProgress / (float)duration;
-                    long remaining = tracker.totalSize - tracker.totalProgress;
-                    long etaInSeconds = (long)(remaining / throughput);
+                    float relDuration = (newEntry.getKey() - oldEntry.getKey()) * 0.001f; // ms to seconds
+                    long relAmount = newEntry.getValue() - oldEntry.getValue();
+                    float throughput = relDuration < 0.001f ? 0f : relAmount / relDuration;
+
+                    long remaining = tracker.totalSize - totalProgress;
+                    long etaInSeconds = throughput < 0.001f ? Long.MAX_VALUE : (long)(remaining / throughput);
                     if (etaInSeconds == 0 && remaining > 0) {
                         etaInSeconds = 1;
                     }
-                    String etaStr = toString(Duration.ofSeconds(etaInSeconds));
+                    String etaStr = etaInSeconds == Long.MAX_VALUE
+                            ? "infinite"
+                            : toString(Duration.ofSeconds(etaInSeconds));
 
                     String msg = String.format("Adding file %d/%d %s %.2f%% - Total %.2f%% - ETA %s",
                             tracker.currentFileIdx, tracker.fileCount, tracker.currentFileName,
