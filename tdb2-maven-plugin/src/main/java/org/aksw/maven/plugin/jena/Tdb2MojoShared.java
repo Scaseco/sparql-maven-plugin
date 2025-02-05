@@ -110,10 +110,6 @@ public class Tdb2MojoShared extends AbstractMojo {
     @Parameter(defaultValue = "nt,ttl,nq,trig,owl,nt.gz,ttl.gz,nq.gz,trig.gz,owl.gz,nt.bz2,ttl.bz2,nq.bz2,trig.bz2,owl.bz2")
     private String includeTypes;
 
-
-    // protected boolean metaDataGraph;
-
-
     @Parameter(defaultValue = "${project.build.directory}/tdb2")
     private File outputFolder;
 
@@ -253,13 +249,8 @@ public class Tdb2MojoShared extends AbstractMojo {
                 Node destNode = update.getDest();
 
                 String destNodeLabel = getGraphLabel(destNode);
-
-                // logger.info("Preparing TDB2 workload: " + update.getSource() + " -> " + update.getDest());
-
                 boolean isAlreadyLoaded = loadState.getFileStates().containsKey(source);
-//                boolean isAlreadyLoaded = destNode == null
-//                        ? false
-//                        : Txn.calculateRead(dg, () -> dg.containsGraph(destNode));
+
                 if (isAlreadyLoaded) {
                     logger.info("Skipping TDB2 workload (already loaded): " + source + " -> " + destNodeLabel);
                 } else {
@@ -448,33 +439,40 @@ public class Tdb2MojoShared extends AbstractMojo {
                 fileCallback.accept(msg);
             };
 
-            ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
-            try {
-                for (Entry<String, Path> e : fileSet.entrySet()) {
-                    String relPathStr = e.getKey();
-                    Path file = e.getValue();
+            for (Entry<String, Path> e : fileSet.entrySet()) {
+                String relPathStr = e.getKey();
+                Path file = e.getValue();
+                Path displayPath = basePath == null ? file : basePath.relativize(file);
 
-                    Path displayPath = basePath == null ? file : basePath.relativize(file);
+                ++tracker.currentFileIdx;
+                tracker.currentFileName = displayPath.toString();
+                tracker.currentFileSize = Files.size(file);
 
-                    ++tracker.currentFileIdx;
-                    tracker.currentFileName = displayPath.toString();
-                    tracker.currentFileSize = Files.size(file);
+                TarArchiveEntry tarEntry = new TarArchiveEntry(file, relPathStr);
+                tOut.putArchiveEntry(tarEntry);
 
-                    TarArchiveEntry tarEntry = new TarArchiveEntry(file, relPathStr);
-                    tOut.putArchiveEntry(tarEntry);
-
-                    try (CountingInputStream cin = new CountingInputStream(Files.newInputStream(file))) {
-                        tracker.currentFileProgress = () -> cin.getCount();
-                        ScheduledFuture<?> future = ses.scheduleAtFixedRate(monitorProgress, 1, 10, TimeUnit.SECONDS);
+                ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
+                try (CountingInputStream cin = new CountingInputStream(Files.newInputStream(file))) {
+                    tracker.currentFileProgress = () -> cin.getCount();
+                    ScheduledFuture<?> future = ses.scheduleAtFixedRate(monitorProgress, 1, 10, TimeUnit.SECONDS);
+                    try {
                         cin.transferTo(tOut);
+                    } finally {
                         future.cancel(false);
                     }
-                    monitorProgress.run();
-                    tracker.currentFileStartProgress += tracker.currentFileProgress.getAsLong();
-                    tOut.closeArchiveEntry();
+                } finally {
+                    ses.shutdown();
+                    try {
+                        if (!ses.awaitTermination(5, TimeUnit.SECONDS)) {
+                            throw new RuntimeException("Progress monitor: Failed to stop.");
+                        }
+                    } catch (InterruptedException e1) {
+                        throw new RuntimeException("Progress monitor: Unexpected interruption", e1);
+                    }
                 }
-            } finally {
-                ses.shutdown();
+                monitorProgress.run();
+                tracker.currentFileStartProgress += tracker.currentFileProgress.getAsLong();
+                tOut.closeArchiveEntry();
             }
             tOut.finish();
         }
