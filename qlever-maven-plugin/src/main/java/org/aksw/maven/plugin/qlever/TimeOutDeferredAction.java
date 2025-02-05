@@ -1,4 +1,4 @@
-package org.aksw.maven.plugin.jena;
+package org.aksw.maven.plugin.qlever;
 
 import java.util.Objects;
 
