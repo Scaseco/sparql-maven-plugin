@@ -238,9 +238,11 @@ public class QleverMojoShared extends AbstractMojo {
 
         boolean[] change = {false};
         // Dataset dataset = TDB2Factory.connectDataset(location);
+
+        String indexName = project.getArtifactId() + "-" + project.getVersion();
         QleverLoader dbLoader = new QleverLoader()
                 .setOutputFolder(outputPath)
-                .setIndexName(project.getArtifactId());
+                .setIndexName(indexName);
 
         QleverDbFileSet qleverFileSet;
         try {
