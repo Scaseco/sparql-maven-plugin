@@ -68,7 +68,7 @@ import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import com.google.common.io.CountingInputStream;
 
 @Mojo(name = "load", defaultPhase = LifecyclePhase.PACKAGE)
-public class QleverMojoShared extends AbstractMojo {
+public class QleverMojoLoad extends AbstractMojo {
 
     /** The repository system (Aether) which does most of the management. */
     @Component

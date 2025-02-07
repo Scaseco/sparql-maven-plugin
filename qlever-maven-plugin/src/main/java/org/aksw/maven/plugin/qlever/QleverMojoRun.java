@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -20,54 +19,50 @@ import org.eclipse.aether.repository.RemoteRepository;
 import jenax.engine.qlever.docker.QleverConfRun;
 import jenax.engine.qlever.docker.QleverRunner;
 
+/**
+ * Mojo to run a qlever database.
+ *
+ * <pre>
+ * mvn qlever:run
+ * </pre>
+ *
+ * For loading qlever database see {@link QleverMojoLoad}.
+ */
 @Mojo(name = "run", defaultPhase = LifecyclePhase.PACKAGE)
-public class QleverRunMojo extends AbstractMojo {
+public class QleverMojoRun extends AbstractMojo {
 
     /** The repository system (Aether) which does most of the management. */
     @Component
-    private RepositorySystem repoSystem;
+    protected RepositorySystem repoSystem;
 
     /** The current repository/network configuration of Maven. */
     @Parameter(defaultValue = "${repositorySystemSession}", readonly = true)
-    private RepositorySystemSession repoSession;
+    protected RepositorySystemSession repoSession;
 
     /** The project's remote repositories to use for the resolution of project dependencies. */
     @Parameter(defaultValue = "${project.remoteProjectRepositories}", readonly = true)
-    private List<RemoteRepository> projectRepos;
+    protected List<RemoteRepository> projectRepos;
 
     /** The Maven project */
     @Parameter(defaultValue = "${project}", readonly = true)
-    private MavenProject project;
+    protected MavenProject project;
 
     @Component
-    private MavenProjectHelper mavenProjectHelper;
+    protected MavenProjectHelper mavenProjectHelper;
 
     // @Parameter(property = "qlever.skip", defaultValue = "false")
     // protected boolean skip;
 
-    /**
-     * Comma separated list of dependency type suffixes which to include.
-     * A type matches if the string after stripping the suffix is empty or ends with a dot.
-     *
-     * Examples:
-     * "nt" matches the suffix "nt" because "" is the empty string.
-     * "rml.ttl" matches the suffix "ttl" because "rml." ends with a dot.
-     * "hint" does NOT match "nt" because "hi" is neither the empty string nor does it end with a dot.
-     *
-     */
-    // TODO Generate content-type+encoding combinations from registries
-    @Parameter(defaultValue = "nt,ttl,nq,trig,owl,nt.gz,ttl.gz,nq.gz,trig.gz,owl.gz,nt.bz2,ttl.bz2,nq.bz2,trig.bz2,owl.bz2")
-    private String includeTypes;
-
     @Parameter(defaultValue = "${project.build.directory}/qlever")
-    private File outputFolder;
+    protected File dbFolder;
 
+    /** Prefix for qlever properties */
     protected static final String NS = "qlever.";
 
-    @Parameter(property = NS + "docker.image", defaultValue = "adfreiburg/qlever")
+    @Parameter(property = NS + "docker.image", defaultValue = QleverConstants.dockerImage)
     protected String dockerImage;
 
-    @Parameter(property = NS + "docker.tag", defaultValue = "commit-a307781")
+    @Parameter(property = NS + "docker.tag", defaultValue = QleverConstants.dockerTag)
     protected String dockerTag;
 
     @Parameter(property = NS + "indexBaseName", defaultValue = "${project.artifactId}-${project.version}")
@@ -155,10 +150,8 @@ public class QleverRunMojo extends AbstractMojo {
     }
 
     protected void executeActual() throws NumberFormatException, IOException, InterruptedException {
-        Log logger = getLog();
-        String outputPath = outputFolder.toPath().toString();
-
+        String dbPathStr = dbFolder.toPath().toString();
         QleverConfRun conf = buildConf();
-        QleverRunner.run(outputPath, dockerImage, dockerTag, port, conf);
+        QleverRunner.run(dbPathStr, dockerImage, dockerTag, port, conf);
     }
 }
