@@ -36,7 +36,6 @@ public class MvnizeMojo extends AbstractMojo {
     @Parameter(property = "file", required = false)
     private File file;
 
-
     /** The Maven project */
     @Parameter(defaultValue = "${project}", readonly = false, required = false)
     private MavenProject project;
