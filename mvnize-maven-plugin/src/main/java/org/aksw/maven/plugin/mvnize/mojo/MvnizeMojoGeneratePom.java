@@ -1,6 +1,9 @@
 package org.aksw.maven.plugin.mvnize.mojo;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.util.Optional;
 
 import org.aksw.maven.plugin.mvnize.util.BuildHelperUtils;
 import org.aksw.maven.plugin.mvnize.util.PomUtils;
@@ -30,10 +33,33 @@ public class MvnizeMojoGeneratePom extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = false, required = false)
     private MavenProject project;
 
+    @Parameter(property = "ignoreMissingFile", required = false, defaultValue = "false")
+    private boolean ignoreMissingFile;
+
     @Override
     public void execute() throws MojoExecutionException {
         Artifact artifact = PomUtils.parseArtifact(artifactId);
-        artifact.setFile(file);
+
+        File absFile = file.getAbsoluteFile();
+        if (!ignoreMissingFile && !absFile.exists()) {
+            throw new MojoExecutionException(new FileNotFoundException("File not found: " + absFile));
+        }
+
+        File projectFile = Optional.of(project)
+            .map(MavenProject::getFile)
+            .map(File::getParentFile)
+            .orElse(new File(""));
+        Path projectAbsPath = projectFile.toPath().toAbsolutePath();
+
+        Path fileAbsPath = absFile.toPath();
+        Path fileRelPath = projectAbsPath.relativize(fileAbsPath);
+
+        if (!fileAbsPath.startsWith(projectAbsPath)) {
+            getLog().warn("File is located outside of the project directory: " + fileRelPath);
+        }
+
+        File relFile = fileRelPath.toFile();
+        artifact.setFile(relFile);
 
         if (pomFile == null) {
             pomFile = new File("pom.xml");
