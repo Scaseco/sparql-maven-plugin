@@ -36,7 +36,7 @@ public class MvnizeMojoBootstrap extends AbstractMojo {
     private String artifactId;
 
     /** The output file. */
-    @Parameter(property = "output", required = false, defaultValue = "generated.pom.xml")
+    @Parameter(property = "outputFile", required = false, defaultValue = "generated.pom.xml")
     private File targetPomFile;
 
     /** The Maven project */

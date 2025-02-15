@@ -28,8 +28,10 @@ import java.util.function.LongSupplier;
 
 import org.aksw.commons.io.util.FileUtils;
 import org.aksw.commons.io.util.FileUtils.OverwritePolicy;
-import org.aksw.jenax.engine.qlever.QleverLoader;
-import org.aksw.jenax.engine.qlever.QleverLoader.QleverDbFileSet;
+import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
+import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseBuilder;
+import org.aksw.jenax.engine.qlever.RdfDatabaseBuilderQlever;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
@@ -240,11 +242,11 @@ public class QleverMojoLoad extends AbstractMojo {
         // Dataset dataset = TDB2Factory.connectDataset(location);
 
         String indexName = project.getArtifactId() + "-" + project.getVersion();
-        QleverLoader dbLoader = new QleverLoader()
+        RdfDatabaseBuilder dbLoader = new RdfDatabaseBuilderQlever()
                 .setOutputFolder(outputPath)
                 .setIndexName(indexName);
 
-        QleverDbFileSet qleverFileSet;
+        FileSet qleverFileSet;
         try {
             // DatasetGraph dg = dataset.asDatasetGraph();
             for (UpdateLoad update : workloads) {
@@ -264,11 +266,12 @@ public class QleverMojoLoad extends AbstractMojo {
                     }
                     loadState.getFileStates().put (source, fileState);
 
-                    dbLoader.addPath(source, loadStateIri);
+                    dbLoader.addPath(source, destNode);
                 }
             }
 
-            qleverFileSet = dbLoader.build();
+            RDFDatabase database = dbLoader.build();
+            qleverFileSet = database.getFileSet();
 
             try {
                 FileUtils.safeCreate(loadStatePath, OverwritePolicy.OVERWRITE, out -> {
@@ -331,9 +334,9 @@ public class QleverMojoLoad extends AbstractMojo {
         }
     }
 
-    public static Map<String, Path> createQleverFileSet(QleverDbFileSet folderToPackage) {
+    public static Map<String, Path> createQleverFileSet(FileSet folderToPackage) throws IOException {
         Map<String, Path> result = new LinkedHashMap<>();
-        for (Path path : folderToPackage.paths()) {
+        for (Path path : folderToPackage.getPaths()) {
             result.put(path.getFileName().toString(), path);
         }
         return result;
